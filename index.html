@@ -1,45 +1,30 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>空島通訊社 Sky News</title>
+<div class="tv-container">
 
-<link rel="stylesheet" href="./css/style.css">
-</head>
+  <!-- 📡 頂部新聞台 -->
+  <div class="topbar">
+    🗞 空島新聞頻道 SKY NEWS
+  </div>
 
-<body>
+  <div class="tv-layout">
 
-<div class="topbar">
-  <div>🗞 空島通訊社 SKY NEWS</div>
-  <div>ISLAND PRESS SYSTEM</div>
-</div>
+    <!-- 📰 左側新聞流 -->
+    <div class="news-panel">
 
-<div class="layout">
+      <div id="breaking"></div>
 
-  <div class="main-news">
-    <h2 id="headline">載入中</h2>
-    <p id="mainText">空島通訊社整理中</p>
+      <div id="newsList"></div>
 
-    <button onclick="initializeNews()">重新整理新聞</button>
-
-    <div class="nav-buttons">
-      <button onclick="prevArticle()">← 上一則</button>
-      <button onclick="nextArticle()">下一則 →</button>
     </div>
-  </div>
 
-  <div class="sidebar">
-    <div id="stats"></div>
-    <div id="newsList"></div>
+    <!-- 📊 右側資訊欄 -->
+    <div class="side-panel">
+
+      <div id="stats" class="stats-box"></div>
+
+      <div class="market-box" id="marketBox"></div>
+
+    </div>
+
   </div>
 
 </div>
-
-<script src="./js/utils.js"></script>
-<script src="./js/world.js"></script>
-<script src="./js/engine.js"></script>
-<script src="./js/llm.js"></script>
-<script src="./js/ui.js"></script>
-</body>
-</html>
