@@ -1,88 +1,69 @@
-:root{
-  --bg:#F6F3EA;
-  --card:#FFFCF5;
-  --green:#2F5D3A;
-  --green2:#3F724D;
-  --text:#2C2C2C;
-  --line:#D8D4C8;
+body {
+  margin: 0;
+  background: #0b0f1a;
+  color: #e6f0ff;
+  font-family: sans-serif;
 }
 
-body{
-  margin:0;
-  font-family: system-ui, "PingFang TC";
-  background:var(--bg);
-  color:var(--text);
+/* 📡 頂部 */
+.topbar {
+  padding: 12px;
+  background: #111a2e;
+  font-weight: bold;
+  letter-spacing: 2px;
 }
 
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  padding:16px 24px;
-  background:var(--green);
-  color:white;
-  font-weight:600;
+/* 🧱 主結構 */
+.tv-layout {
+  display: flex;
+  height: 90vh;
 }
 
-.layout{
-  display:grid;
-  grid-template-columns: 2.2fr 1fr;
-  gap:16px;
-  padding:16px;
+/* 📰 新聞流 */
+.news-panel {
+  flex: 2;
+  padding: 10px;
+  overflow-y: auto;
 }
 
-.main-news{
-  background:var(--card);
-  border-radius:14px;
-  padding:20px;
-  min-height:320px;
-  border:1px solid var(--line);
+/* 📊 側欄 */
+.side-panel {
+  flex: 1;
+  padding: 10px;
+  border-left: 1px solid #223;
 }
 
-.sidebar{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
-  border:1px solid var(--line);
+/* 🧾 新聞卡 */
+.news-item {
+  background: #141c2f;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #223;
 }
 
-button{
-  margin-top:12px;
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:var(--green);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+/* 🚨 BREAKING */
+#breaking {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #3b0d0d;
+  color: #ffb3b3;
+  font-weight: bold;
+  display: none;
 }
 
-button:hover{
-  background:var(--green2);
+/* 📊 stats */
+.stats-box {
+  padding: 10px;
+  background: #121a2b;
+  margin-bottom: 10px;
+  border-radius: 8px;
 }
 
-.nav-buttons{
-  display:flex;
-  gap:8px;
-}
-
-.nav-buttons button{
-  width:50%;
-}
-
-.news-item{
-  background:#fff;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
-  border:1px solid var(--line);
-  font-size:13px;
-}
-
-.stat{
-  background:#fff;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
-  border:1px solid var(--line);
+/* 🏪 市集 */
+.market-box {
+  padding: 10px;
+  background: #101827;
+  border-radius: 8px;
+  white-space: pre-line;
 }
