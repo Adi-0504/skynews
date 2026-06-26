@@ -12,7 +12,7 @@ function avg(arr){
 }
 
 /* =========================
-   🌪 微變動
+   🌪 每篇差異（關鍵）
 ========================= */
 function jitter(obj){
 
@@ -20,7 +20,7 @@ function jitter(obj){
 
   for(let k in obj){
     let v = obj[k] || 0;
-    out[k] = v * (0.85 + Math.random()*0.3);
+    out[k] = v * (0.82 + Math.random()*0.36);
   }
 
   return out;
@@ -33,89 +33,91 @@ function pickTopic(){
 
   const r = Math.random();
 
-  if(r < 0.25) return "weather";
-  if(r < 0.5) return "economy";
-  if(r < 0.7) return "transport";
-  if(r < 0.9) return "society";
+  if(r < 0.22) return "weather";
+  if(r < 0.44) return "economy";
+  if(r < 0.66) return "transport";
+  if(r < 0.88) return "society";
   return "breaking";
 }
 
 /* =========================
-   標題
+   標題（半正式）
 ========================= */
 function pickHeadline(topic, env,eco,trans,soc){
 
   if(topic === "weather"){
-    return "氣候觀測：空島天氣系統維持穩定";
+    return "氣象觀測：空島雲層結構維持穩定";
   }
 
   if(topic === "economy"){
     return eco.price > 150
-      ? "市場價格出現上升趨勢"
-      : "經濟活動維持穩定運作";
+      ? "市場動態：mato damu流通出現上升"
+      : "經濟觀測：四島市場維持平穩";
   }
 
   if(topic === "transport"){
     return trans.delay > 30
-      ? "空鷹航線出現延誤情況"
-      : "空鷹運輸系統正常運行";
+      ? "交通通報：空鷹航線出現延遲情形"
+      : "空鷹航運：整體運作維持正常";
   }
 
   if(topic === "society"){
-    return "四島社會運作持續穩定";
+    return "社會觀察：四島居民活動穩定進行";
   }
 
-  return "突發：空鷹航線氣流異常事件";
+  return "突發觀測：高層氣流出現短暫異動";
 }
 
 /* =========================
-   🧠 核心長文生成（重點🔥）
+   🧠 半正式長文（重點🔥）
 ========================= */
 function buildLongArticle(topic, env,eco,trans,soc){
 
-  const baseIntro = `
-空島通訊社綜合報導指出，本日四島系統仍維持穩定運作。根據最新觀測數據顯示，各項指標雖出現微幅波動，但整體仍在安全範圍內。
+  const intro = `
+空島通訊社報導。
+
+今日四島浮空系統整體運作維持穩定。根據觀測站資料顯示，雲層結構與氣流分布未出現異常變化，但局部區域仍有細微波動。
 `;
 
   const weather = `
-【氣候分析】
-目前平均氣溫約 ${(env.temp).toFixed(1)}°C，降雨指數 ${(env.rain).toFixed(0)}。
-氣象中心表示，本週雲層結構呈現周期性變化，部分區域可能出現短暫降雨，但不影響整體活動。
+氣象單位指出，目前平均氣溫約為 ${env.temp.toFixed(1)}°C。
+雲層分布整體平穩，但森林島上空仍有局部雲層增厚現象，推測與中層氣流活動有關。
+短時間內曾出現輕微浮雨，但未影響地面活動。
 `;
 
   const economy = `
-【經濟觀察】
-市場指數目前約 ${(eco.price).toFixed(0)}，顯示市場仍處於穩定狀態。
-然而部分農產品與礦產交易價格出現波動，分析指出這與物流調整及需求變化有關。
+經濟觀測顯示，mato damu流通維持穩定水準。
+平原島農業交易量略有提升，而礦山島輸出節奏則出現輕微放緩。
+市場單位表示，目前變化屬於正常供需調整範圍。
 `;
 
   const transport = `
-【交通運輸】
-空鷹航線延遲率約 ${(trans.delay).toFixed(0)}%。
-雖然部分航線受到氣流影響，但整體運輸效率仍維持穩定。
+交通方面，空鷹航線平均延遲率約為 ${trans.delay.toFixed(0)}%。
+部分航線因氣流變化進行高度調整，但整體運輸系統仍維持正常。
+馴鷹員回報，空鷹狀態穩定，飛行行為無異常。
 `;
 
   const society = `
-【社會狀態】
-各島居民生活節奏穩定，市場與教育活動正常進行。
-社會信心維持高點，未觀測到重大異常事件。
+社會層面顯示，各島居民日常活動維持穩定節奏。
+市場、教育與港口運作均正常進行，未有重大事件通報。
+整體社會穩定度維持在良好水平。
 `;
 
-  const expand = `
-【延伸觀察】
-專家指出，目前系統穩定性雖高，但仍需持續監控氣候與物流變化。
-未來幾日可能出現輕微波動，相關單位已啟動預防機制。
+  const observation = `
+觀測站補充指出，今日雲層中段曾出現短暫回旋氣流。
+該現象持續時間不長，目前已消散，但仍列入追蹤觀測項目。
 `;
 
-  const conclusion = `
-綜合評估顯示，四島系統整體維持穩定運作狀態，短期內無重大風險。
+  const ending = `
+綜合評估顯示，四島浮空系統仍維持穩定運作狀態。
+空島通訊社將持續追蹤後續變化。
 `;
 
-  return baseIntro + weather + economy + transport + society + expand + conclusion;
+  return intro + weather + economy + transport + society + observation + ending;
 }
 
 /* =========================
-   🚀 每日50則（長文版）
+   🚀 每日50則（正式輸出）
 ========================= */
 async function generateNewsBatch(world){
 
@@ -138,18 +140,6 @@ async function generateNewsBatch(world){
     const title = pickHeadline(topic, env,eco,trans,soc);
 
     let content = buildLongArticle(topic, env,eco,trans,soc);
-
-    /* ⚠️ 重點修正：
-       LLM 只能「加長」，不能「摘要」
-    */
-    if(typeof polish === "function"){
-      const extra = await polish(content);
-
-      // 🧠 避免被縮短
-      if(extra && extra.length > content.length){
-        content = extra;
-      }
-    }
 
     articles.push({
       title,
