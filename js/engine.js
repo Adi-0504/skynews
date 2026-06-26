@@ -1,9 +1,9 @@
 function generateNewsData(){
 
   const env = avg(world.env);
-  const eco = avg(world.eco);
-  const trans = avg(world.trans);
-  const soc = avg(world.soc);
+  const eco = avg(world.economy);
+  const trans = avg(world.transport);
+  const soc = avg(world.society);
 
   return {
     headline: pickHeadline(env,eco,trans,soc),
@@ -15,26 +15,26 @@ function generateNewsData(){
     transport: `延遲 ${trans.delay.toFixed(0)}%`,
 
     items:[
-      "平原島農業產量穩定",
-      "森林島供應鏈正常",
-      "礦山島出口略降",
-      "沙灘島港口運作順暢"
+      "平原島農業穩定",
+      "森林島供應正常",
+      "礦山島出口微降",
+      "沙灘島運作正常"
     ]
   };
 }
 
 function pickHeadline(env,eco,trans,soc){
 
-  if(eco.price>150)
+  if(eco.price > 150)
     return "市場價格上升，糧食供應緊縮";
 
-  if(trans.delay>30)
+  if(trans.delay > 30)
     return "空鷹交通延誤影響物流";
 
-  if(env.rain>70)
+  if(env.rain > 70)
     return "森林島降雨增加影響農業";
 
-  if(soc.production>70)
+  if(soc.production > 70)
     return "四島生產維持成長";
 
   return "空島系統運作正常";
