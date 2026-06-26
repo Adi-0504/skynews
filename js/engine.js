@@ -2,13 +2,13 @@
    🌍 空島世界狀態
 ========================= */
 
+let articles = [];
+
 let skyTime = {
   day: 1,
   hour: 6,
   minute: 0
 };
-
-let articles = [];
 
 let worldState = {
   chaos: 0,
@@ -52,7 +52,7 @@ function getSeason(day){
 }
 
 /* =========================
-   🌅 時段系統
+   🌅 時段
 ========================= */
 
 function getTimePhase(hour){
@@ -65,7 +65,7 @@ function getTimePhase(hour){
 }
 
 /* =========================
-   🏪 市集系統（時間控制）
+   🏪 市集
 ========================= */
 
 function marketInfo(){
@@ -94,11 +94,10 @@ function updateWorld(){
 }
 
 /* =========================
-   📡 BREAKING 判定
+   🚨 BREAKING
 ========================= */
 
 function isBreaking(){
-
   return Math.abs(worldState.chaos) > 7;
 }
 
@@ -112,9 +111,7 @@ function generateArticle(){
   const phase = getTimePhase(skyTime.hour);
   const season = getSeason(skyTime.day);
 
-  const breaking = isBreaking();
-
-  if(breaking){
+  if(isBreaking()){
 
     return {
       title: "🚨 BREAKING：空島氣流異常波動",
@@ -123,12 +120,11 @@ function generateArticle(){
 
 空島氣象中心偵測到異常氣流變動。
 
-目前：
 - 空鷹航線調整中
 - 雲層密度上升
-- 系統進入觀測模式
+- 系統進入監測模式
 
-時間：${skyTime.hour}:${skyTime.minute}
+時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
 `
     };
   }
@@ -136,16 +132,14 @@ function generateArticle(){
   return {
     title: `【${phase}】空島日常觀測`,
     content: `
-【空島通訊社】
+【空島通訊社報導】
 
 本日第 ${skyTime.day} 天（${season}）
 
-觀測顯示：
-氣候與市場維持穩定運作。
+系統觀測顯示整體運作穩定。
 
-🏪 市集資訊：
-${market.name}（${market.status}）
-今日商品：${market.item}
+🏪 ${market.name}：
+${market.status}｜今日商品：${market.item}
 
 時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
 `
@@ -167,40 +161,67 @@ function spawnNews(){
     articles.unshift(generateArticle());
   }
 
-  articles = articles.slice(0, 200);
+  if(articles.length > 200){
+    articles = articles.slice(0, 200);
+  }
 
   render();
 }
 
 /* =========================
-   🖥 UI
+   🖥 電視台 UI
 ========================= */
 
 function render(){
 
   const list = document.getElementById("newsList");
+  const breaking = document.getElementById("breaking");
+  const stats = document.getElementById("stats");
+  const marketBox = document.getElementById("marketBox");
+
   if(!list) return;
 
   list.innerHTML = "";
 
-  articles.forEach(a=>{
+  let hasBreaking = false;
+
+  articles.forEach(a => {
+
     const div = document.createElement("div");
     div.className = "news-item";
     div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
     list.appendChild(div);
+
+    if(a.title.includes("BREAKING")){
+      hasBreaking = true;
+    }
   });
 
-  const stats = document.getElementById("stats");
-  if(stats){
-
-    stats.innerHTML = `
-      🕒 第 ${skyTime.day} 天
-      ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
-      🌿 ${getSeason(skyTime.day)}
-      📡 ${getTimePhase(skyTime.hour)}
-      📰 ${articles.length} 則新聞
-    `;
+  /* 🚨 BREAKING 顯示 */
+  if(breaking){
+    if(hasBreaking){
+      breaking.style.display = "block";
+      breaking.innerText = "🚨 BREAKING NEWS LIVE";
+    } else {
+      breaking.style.display = "none";
+    }
   }
+
+  /* 📊 狀態欄 */
+  stats.innerHTML = `
+    🕒 第 ${skyTime.day} 天<br>
+    ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}<br>
+    🌿 ${getSeason(skyTime.day)}<br>
+    📡 ${getTimePhase(skyTime.hour)}<br>
+    📰 ${articles.length} 則新聞
+  `;
+
+  /* 🏪 市集 */
+  const m = marketInfo();
+  marketBox.innerText =
+`🏪 ${m.name}
+狀態：${m.status}
+今日商品：${m.item}`;
 }
 
 /* =========================
