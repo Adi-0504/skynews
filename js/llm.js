@@ -1,27 +1,41 @@
-let generator = null;
+let LLM_READY = true;
 
+/* =========================
+   假 LLM 初始化（秒完成）
+========================= */
 async function loadLLM(){
 
-  const { pipeline } = await import(
-    "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"
-  );
+  console.log("⚡ Fast LLM ready (no model download)");
 
-  generator = await pipeline(
-    "text-generation",
-    "Xenova/distilgpt2"
-  );
-
-  console.log("🧠 LLM loaded");
+  LLM_READY = true;
 }
 
-async function polish(text){
+/* =========================
+   超快「潤稿器」（不用AI模型）
+========================= */
+function polish(text){
 
-  if(!generator) return text;
+  if(!LLM_READY) return text;
 
-  const result = await generator(text, {
-    max_new_tokens: 120,
-    temperature: 0.7
-  });
+  const styles = [
+    "本社報導指出，",
+    "最新消息顯示，",
+    "據空島通訊社觀察，",
+    "相關單位表示，"
+  ];
 
-  return result[0].generated_text;
+  const suffix = [
+    "目前情勢仍持續觀察中。",
+    "後續發展將持續追蹤。",
+    "各島運作仍維持基本穩定。",
+    "詳細情況仍待進一步確認。"
+  ];
+
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  return `
+${pick(styles)}${text}
+
+${pick(suffix)}
+`;
 }
