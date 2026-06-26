@@ -12,90 +12,158 @@ function avg(arr){
 }
 
 /* =========================
-   標題
+   🌪 微變動
 ========================= */
-function pickHeadline(env,eco,trans,soc){
+function jitter(obj){
 
-  const pool = [
-    "空島系統維持穩定運作",
-    "四島物流體系持續正常",
-    "市場波動幅度有限",
-    "氣候條件整體平穩",
-    "空鷹航線運行順暢"
-  ];
+  let out = {};
 
-  if(eco.price > 150) return "市場價格出現小幅上升趨勢";
-  if(trans.delay > 30) return "空鷹航線出現短暫延誤情況";
-  if(env.rain > 60) return "降雨量增加影響部分農業活動";
+  for(let k in obj){
+    let v = obj[k] || 0;
+    out[k] = v * (0.85 + Math.random()*0.3);
+  }
 
-  return pool[Math.floor(Math.random() * pool.length)];
+  return out;
 }
 
 /* =========================
-   🔥 生成長新聞（核心）
+   🧠 主題分配器
 ========================= */
-function generateArticle(env,eco,trans,soc){
+function pickTopic(){
 
-  const intro = `
-空島通訊社綜合報導指出，目前四島系統仍維持穩定運作狀態。根據最新觀測資料顯示，各項基礎數據包含氣候、經濟、交通與社會運作皆在正常範圍內波動，並未出現大規模異常情形。
-`;
+  const r = Math.random();
 
-  const weather = `
-在氣候方面，平原島與森林島溫度平均維持在 ${env.temp.toFixed(1)}°C 左右，降雨指數約為 ${env.rain.toFixed(0)}。氣象單位指出，目前雲層分布均勻，未觀測到極端氣候事件，但部分區域仍可能出現短暫降雨變化。
-`;
-
-  const economy = `
-經濟方面，整體市場指數約為 ${eco.price.toFixed(0)}，顯示市場活動仍處於穩定區間。然而部分農產品與礦產交易價格出現輕微波動，專家指出這可能與近期物流調整有關，但目前尚未對整體經濟造成明顯影響。
-`;
-
-  const transport = `
-交通系統方面，空鷹航線延遲率約為 ${trans.delay.toFixed(0)}%，整體運輸仍維持正常運作。交通管理中心表示，目前航線調度效率穩定，但仍將持續監測風向與氣流變化，以確保跨島運輸安全。
-`;
-
-  const society = `
-社會層面觀察顯示，各島居民生活節奏穩定，基礎設施運作正常。教育與市場活動持續進行，並未出現大規模中斷情況。社會指標顯示整體穩定度維持在高水準。
-`;
-
-  const conclusion = `
-綜合以上資訊，空島通訊社判斷目前四島系統仍處於穩定運作階段。相關單位將持續監測各項數據變化，以確保未來可能出現的環境或經濟波動能被即時應對。
-`;
-
-  return intro + weather + economy + transport + society + conclusion;
+  if(r < 0.25) return "weather";
+  if(r < 0.5)  return "economy";
+  if(r < 0.7)  return "transport";
+  if(r < 0.9)  return "society";
+  return "breaking";
 }
 
 /* =========================
-   生成10篇新聞（LLM optional）
+   標題生成（依主題）
+========================= */
+function pickHeadline(topic, env, eco, trans, soc){
+
+  if(topic === "weather"){
+    return "氣候觀測：空島天氣系統穩定運作";
+  }
+
+  if(topic === "economy"){
+    if(eco.price > 150) return "市場價格出現上升壓力";
+    return "經濟活動維持穩定";
+  }
+
+  if(topic === "transport"){
+    if(trans.delay > 30) return "空鷹航線出現延誤";
+    return "空鷹運輸系統正常運行";
+  }
+
+  if(topic === "society"){
+    return "四島社會運作穩定";
+  }
+
+  if(topic === "breaking"){
+    return "突發：空鷹航線氣流異常事件";
+  }
+
+  return "空島新聞更新";
+}
+
+/* =========================
+   📰 依主題生成內文
+========================= */
+function generateArticle(topic, env,eco,trans,soc){
+
+  const noise = Math.random();
+
+  if(topic === "weather"){
+
+    return `
+空島通訊社氣象中心指出，目前四島氣候系統維持穩定運作。
+
+觀測數據顯示，平均氣溫約 ${(env.temp+noise).toFixed(1)}°C，降雨指數 ${(env.rain+noise*10).toFixed(0)}。
+雲層分布呈現輕微變化，但尚未達到警戒標準。
+
+氣象單位表示，目前沒有極端氣候事件發生，各島居民活動可正常進行。
+`;
+  }
+
+  if(topic === "economy"){
+
+    return `
+經濟觀測報告指出，目前市場活動持續穩定。
+
+市場指數約 ${(eco.price+noise*5).toFixed(0)}，部分商品價格出現小幅波動。
+分析指出，這與近期物流調整與需求變化有關。
+
+整體而言，經濟系統仍維持健康運作狀態。
+`;
+  }
+
+  if(topic === "transport"){
+
+    return `
+空鷹交通中心發布最新運輸報告。
+
+目前航線延遲率約 ${(trans.delay+noise*3).toFixed(0)}%，部分航班受到氣流影響。
+但整體航運系統仍維持穩定，未出現大規模延誤。
+
+交通單位持續監控風場變化，以確保安全。
+`;
+  }
+
+  if(topic === "society"){
+
+    return `
+社會運作觀察報告指出，各島居民生活秩序穩定。
+
+教育、市場與日常活動均正常進行，社會信心維持高點。
+目前未觀察到重大社會事件或異常情況。
+`;
+  }
+
+  return `
+突發事件通報：空鷹航線出現短暫氣流異常。
+
+相關單位已介入調查，目前部分航線延後，但未造成重大影響。
+`;
+}
+
+/* =========================
+   🚀 每日50則（主題版）
 ========================= */
 async function generateNewsBatch(world){
 
-  const env = avg(world.env);
-  const eco = avg(world.economy);
-  const trans = avg(world.transport);
-  const soc = avg(world.society);
+  const baseEnv = avg(world.env);
+  const baseEco = avg(world.economy);
+  const baseTrans = avg(world.transport);
+  const baseSoc = avg(world.society);
 
   let articles = [];
 
-  for(let i=0;i<10;i++){
+  for(let i=0;i<50;i++){
 
-    let title = pickHeadline(env,eco,trans,soc);
+    const topic = pickTopic();
 
-    if(Math.random() > 0.7){
-      title = "突發：空鷹航線出現短暫氣流異常";
-    }
+    const env = jitter(baseEnv);
+    const eco = jitter(baseEco);
+    const trans = jitter(baseTrans);
+    const soc = jitter(baseSoc);
 
-    let draft = generateArticle(env,eco,trans,soc);
+    const title = pickHeadline(topic, env,eco,trans,soc);
 
-    let content = draft;
+    let content = generateArticle(topic, env,eco,trans,soc);
 
-    // 🧠 如果有 LLM 就潤稿（可選）
     if(typeof polish === "function"){
-      content = await polish(draft);
+      content = await polish(content);
     }
 
     articles.push({
       title,
       content,
-      time: new Date().toLocaleString()
+      time: new Date().toLocaleString(),
+      topic
     });
   }
 
