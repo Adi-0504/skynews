@@ -1,26 +1,39 @@
 function generate(){
 
-  const data = generateNewsData();
+  try{
 
-  // 📰 BBC主標
-  document.getElementById("headline").innerText = data.headline;
-  document.getElementById("mainText").innerText = data.main;
+    const data = generateNewsData();
 
-  // 📊 東森數據
-  document.getElementById("stats").innerHTML = `
-    <div class="stat">🌤 ${data.weather}</div>
-    <div class="stat">💰 ${data.economy}</div>
-    <div class="stat">🕊 ${data.transport}</div>
-  `;
+    if(!data){
+      throw new Error("No data from generateNewsData()");
+    }
 
-  // 🧾 日本新聞列表
-  const list = document.getElementById("newsList");
-  list.innerHTML = "";
+    document.getElementById("headline").innerText = data.headline || "無標題";
+    document.getElementById("mainText").innerText = data.main || "";
 
-  data.items.forEach(n=>{
-    const div = document.createElement("div");
-    div.className = "news-item";
-    div.innerText = n;
-    list.appendChild(div);
-  });
+    document.getElementById("stats").innerHTML = `
+      <div class="stat">🌤 ${data.weather || "-"}</div>
+      <div class="stat">💰 ${data.economy || "-"}</div>
+      <div class="stat">🕊 ${data.transport || "-"}</div>
+    `;
+
+    const list = document.getElementById("newsList");
+    list.innerHTML = "";
+
+    (data.items || []).forEach(n=>{
+      const div = document.createElement("div");
+      div.className = "news-item";
+      div.innerText = n;
+      list.appendChild(div);
+    });
+
+  }catch(err){
+    console.log("ERROR:", err);
+
+    document.getElementById("headline").innerText =
+      "系統錯誤（請檢查 engine.js）";
+
+    document.getElementById("mainText").innerText =
+      "資料生成失敗，但UI仍可運作";
+  }
 }
