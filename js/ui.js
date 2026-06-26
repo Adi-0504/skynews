@@ -1,7 +1,10 @@
 
 let articles = [];
 let index = 0;
-let loading = false;
+
+let state = {
+  loading: false
+};
 
 /* =========================
    loading 畫面
@@ -9,42 +12,49 @@ let loading = false;
 function showLoading(){
 
   document.getElementById("headline").innerText = "空島通訊社整理中";
-  document.getElementById("mainText").innerText = "新聞生成中…";
+  document.getElementById("mainText").innerText = "新聞生成中…請稍候";
 }
 
 /* =========================
-   初始化新聞（可重複刷新🔥）
+   初始化新聞
 ========================= */
 async function initializeNews(){
 
-  if(loading) return;
-  loading = true;
+  if(state.loading) return;
+
+  state.loading = true;
 
   showLoading();
 
-  // ⏳ 模擬 loading（5秒）
-  await new Promise(r => setTimeout(r, 5000));
+  await sleep(5000);
 
-  // 🧠 生成新聞
-  articles = await generateNewsBatch(world);
+  try{
 
-  index = 0;
+    articles = await generateNewsBatch(world);
 
-  render();
+    index = 0;
 
-  loading = false;
+    render();
+
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("headline").innerText = "新聞載入失敗";
+    document.getElementById("mainText").innerText = "請重新整理";
+  }
+
+  state.loading = false;
 }
 
 /* =========================
-   render（防炸版本）
+   render（純新聞閱讀模式🔥）
 ========================= */
 function render(){
 
   if(!articles || articles.length === 0){
-
-    document.getElementById("headline").innerText = "尚未生成新聞";
-    document.getElementById("mainText").innerText = "請稍候…";
-
+    document.getElementById("headline").innerText = "尚無新聞";
+    document.getElementById("mainText").innerText = "請稍候或重新整理";
     return;
   }
 
@@ -56,26 +66,14 @@ function render(){
   }
 
   document.getElementById("headline").innerText = a.title;
-  document.getElementById("mainText").innerText = a.content;
 
-  document.getElementById("stats").innerHTML = `
-    <div>📰 第 ${index + 1} / ${articles.length} 則</div>
-    <div>⏰ ${a.time}</div>
-  `;
-
-  const list = document.getElementById("newsList");
-  list.innerHTML = "";
-
-  articles.forEach(n => {
-    const div = document.createElement("div");
-    div.className = "news-item";
-    div.innerText = n.title;
-    list.appendChild(div);
-  });
+  // 🧠 讓新聞變「一整篇文章感」
+  document.getElementById("mainText").innerText =
+    `【空島通訊社報導】\n\n${a.content}\n\n📅 ${a.time}`;
 }
 
 /* =========================
-   下一則
+   下一篇
 ========================= */
 function nextArticle(){
 
@@ -87,7 +85,7 @@ function nextArticle(){
 }
 
 /* =========================
-   上一則
+   上一篇
 ========================= */
 function prevArticle(){
 
@@ -99,7 +97,14 @@ function prevArticle(){
 }
 
 /* =========================
-   掛到全域（HTML用）
+   工具
+========================= */
+function sleep(ms){
+  return new Promise(r => setTimeout(r, ms));
+}
+
+/* =========================
+   全域掛載
 ========================= */
 window.initializeNews = initializeNews;
 window.nextArticle = nextArticle;
