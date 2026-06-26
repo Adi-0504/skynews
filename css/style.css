@@ -1,0 +1,89 @@
+body{
+  margin:0;
+  font-family:"PingFang TC", sans-serif;
+  background:#0b1220;
+  color:#e5e7eb;
+}
+
+/* 🔝 BBC頂欄 */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  padding:14px 20px;
+  background:#111827;
+  border-bottom:1px solid #1f2937;
+}
+
+.logo{
+  font-weight:bold;
+  letter-spacing:2px;
+}
+
+/* 🧱 Layout */
+.layout{
+  display:grid;
+  grid-template-columns: 2fr 1fr;
+  gap:12px;
+  padding:12px;
+}
+
+/* 📰 主新聞 */
+.main-news{
+  background:#111827;
+  padding:16px;
+  border-radius:12px;
+  min-height:300px;
+}
+
+.main-news h2{
+  margin-top:0;
+}
+
+/* 📊 側欄 */
+.sidebar{
+  background:#0f172a;
+  padding:12px;
+  border-left:1px solid #1f2937;
+}
+
+/* 📦 stats */
+.stat{
+  background:#111827;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:10px;
+  font-size:13px;
+}
+
+/* 🧾 日本新聞列表 */
+.news-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+
+.news-item{
+  background:#111827;
+  padding:10px;
+  border-radius:8px;
+  font-size:13px;
+  opacity:0.9;
+}
+
+.news-item:hover{
+  background:#1f2937;
+  cursor:pointer;
+}
+
+/* 🔘 button */
+button{
+  margin-top:12px;
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  font-weight:bold;
+  cursor:pointer;
+}
