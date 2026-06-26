@@ -1,135 +1,210 @@
+/* =========================
+   🌍 空島世界狀態
+========================= */
+
+let skyTime = {
+  day: 1,
+  hour: 6,
+  minute: 0
+};
+
+let articles = [];
+
+let worldState = {
+  chaos: 0,
+  economy: 100,
+  weather: 0
+};
 
 /* =========================
-   🌍 世界事件
+   ⏱ 時間系統（20h / 65min）
 ========================= */
-function randomEvent(){
 
-  const events = [
-    {
-      title: "雲層穩定流動",
-      desc: "森林島上空氣流維持自然循環"
-    },
-    {
-      title: "空鷹航線順暢",
-      desc: "平原島航班準點率提升"
-    },
-    {
-      title: "mato damu市場穩定",
-      desc: "礦山島交易節奏正常"
-    },
-    {
-      title: "居民活動活躍",
-      desc: "各島市場與學校維持運作"
-    }
-  ];
+function tickTime(){
 
-  return events[Math.floor(Math.random()*events.length)];
-}
+  skyTime.minute += 1;
 
-/* =========================
-   🏪 市集資訊
-========================= */
-function marketInfo(){
-
-  const markets = [
-    "金穗市集（平原島）",
-    "雲橋市集（森林島）",
-    "礦心交易所（礦山島）",
-    "潮聲市集（沙灘島）"
-  ];
-
-  const items = [
-    "雲莓momu baru 8折",
-    "森椒新鮮到貨",
-    "波光鹽特價",
-    "椰子飲品買一送一",
-    "空鷹羽飾限量"
-  ];
-
-  const status = [
-    "正常營業",
-    "人潮適中",
-    "早市熱絡",
-    "午後補貨中"
-  ];
-
-  const m = markets[Math.floor(Math.random()*markets.length)];
-  const i = items[Math.floor(Math.random()*items.length)];
-  const s = status[Math.floor(Math.random()*status.length)];
-
-  return `📍 ${m}
-狀態：${s}
-特價：${i}`;
-}
-
-/* =========================
-   🌿 趣事系統（重點🔥）
-========================= */
-function funFact(){
-
-  const fun = [
-    "有一隻空鷹今天在雲層裡繞了三圈才找到航道",
-    "森林島的商人說今天的雲莓比昨天甜一點點",
-    "有人在市集看到椰子自己滾下坡，被當成好兆頭",
-    "礦山島的鐘聲比平常慢了三秒，但沒人知道原因",
-    "沙灘島的小販今天把波光鹽排成了星星形狀",
-    "一群學生在雲橋市集比賽誰能聽懂空鷹叫聲"
-  ];
-
-  return fun[Math.floor(Math.random()*fun.length)];
-}
-
-/* =========================
-   🧠 新聞生成
-========================= */
-function buildArticle(event){
-
-  const intro = `【空島通訊社報導】${event.title}`;
-
-  const body = `觀測顯示：${event.desc}，整體系統維持穩定運作。`;
-
-  const market = marketInfo();
-
-  const fun = funFact();
-
-  const closing = `今日空島運作維持正常，生活節奏平穩。`;
-
-  return `${intro}
-
-${body}
-
----
-
-🏪 市集情報
-${market}
-
----
-
-🌿 空島趣事
-${fun}
-
----
-
-${closing}`;
-}
-
-/* =========================
-   🚀 50篇生成
-========================= */
-async function generateNewsBatch(){
-
-  let articles = [];
-
-  for(let i=0;i<50;i++){
-
-    const event = randomEvent();
-
-    articles.push({
-      title: `【空島通訊社】${event.title}`,
-      content: buildArticle(event),
-      time: new Date().toLocaleString()
-    });
+  if(skyTime.minute >= 65){
+    skyTime.minute = 0;
+    skyTime.hour++;
   }
 
-  return articles;
+  if(skyTime.hour >= 20){
+    skyTime.hour = 0;
+    skyTime.day++;
+  }
 }
+
+/* =========================
+   🌿 季節系統（350天）
+========================= */
+
+function getSeason(day){
+
+  const d = day % 350;
+  const m = Math.floor(d / 35);
+
+  if(m <= 2) return "綠芽季";
+  if(m <= 4) return "熙陽季";
+  if(m <= 6) return "豐饒季";
+  if(m <= 8) return "寒霜季";
+  return "冰雪季";
+}
+
+/* =========================
+   🌅 時段系統
+========================= */
+
+function getTimePhase(hour){
+
+  if(hour < 7) return "凌晨觀測";
+  if(hour < 12) return "早間新聞";
+  if(hour < 16) return "午間速報";
+  if(hour < 20) return "傍晚報導";
+  return "夜間觀測";
+}
+
+/* =========================
+   🏪 市集系統（時間控制）
+========================= */
+
+function marketInfo(){
+
+  const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
+  const items = ["雲莓momu baru", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
+
+  const isOpen = skyTime.hour >= 6 && skyTime.hour <= 18;
+
+  return {
+    name: markets[Math.floor(Math.random()*markets.length)],
+    item: items[Math.floor(Math.random()*items.length)],
+    status: isOpen ? "營業中" : "休市"
+  };
+}
+
+/* =========================
+   🌍 世界變動
+========================= */
+
+function updateWorld(){
+
+  worldState.weather += (Math.random()-0.5)*2;
+  worldState.economy += (Math.random()-0.5)*1.5;
+  worldState.chaos += (Math.random()-0.5)*2;
+}
+
+/* =========================
+   📡 BREAKING 判定
+========================= */
+
+function isBreaking(){
+
+  return Math.abs(worldState.chaos) > 7;
+}
+
+/* =========================
+   📰 單篇新聞
+========================= */
+
+function generateArticle(){
+
+  const market = marketInfo();
+  const phase = getTimePhase(skyTime.hour);
+  const season = getSeason(skyTime.day);
+
+  const breaking = isBreaking();
+
+  if(breaking){
+
+    return {
+      title: "🚨 BREAKING：空島氣流異常波動",
+      content: `
+【緊急觀測】
+
+空島氣象中心偵測到異常氣流變動。
+
+目前：
+- 空鷹航線調整中
+- 雲層密度上升
+- 系統進入觀測模式
+
+時間：${skyTime.hour}:${skyTime.minute}
+`
+    };
+  }
+
+  return {
+    title: `【${phase}】空島日常觀測`,
+    content: `
+【空島通訊社】
+
+本日第 ${skyTime.day} 天（${season}）
+
+觀測顯示：
+氣候與市場維持穩定運作。
+
+🏪 市集資訊：
+${market.name}（${market.status}）
+今日商品：${market.item}
+
+時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
+`
+  };
+}
+
+/* =========================
+   🚀 新聞生成流
+========================= */
+
+function spawnNews(){
+
+  updateWorld();
+  tickTime();
+
+  const count = isBreaking() ? 3 : 1;
+
+  for(let i=0;i<count;i++){
+    articles.unshift(generateArticle());
+  }
+
+  articles = articles.slice(0, 200);
+
+  render();
+}
+
+/* =========================
+   🖥 UI
+========================= */
+
+function render(){
+
+  const list = document.getElementById("newsList");
+  if(!list) return;
+
+  list.innerHTML = "";
+
+  articles.forEach(a=>{
+    const div = document.createElement("div");
+    div.className = "news-item";
+    div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
+    list.appendChild(div);
+  });
+
+  const stats = document.getElementById("stats");
+  if(stats){
+
+    stats.innerHTML = `
+      🕒 第 ${skyTime.day} 天
+      ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
+      🌿 ${getSeason(skyTime.day)}
+      📡 ${getTimePhase(skyTime.hour)}
+      📰 ${articles.length} 則新聞
+    `;
+  }
+}
+
+/* =========================
+   ▶️ 啟動
+========================= */
+
+setInterval(spawnNews, 4000);
