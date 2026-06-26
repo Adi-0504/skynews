@@ -12,24 +12,33 @@ function avg(arr){
 
 function pickHeadline(env,eco,trans,soc){
 
-  if(eco.price > 150) return "市場價格上升";
-  if(trans.delay > 30) return "空鷹交通延誤";
-  if(env.rain > 60) return "降雨影響農業";
-  return "空島系統穩定";
+  const pool = [
+    "空島系統維持穩定",
+    "四島物流運作正常",
+    "市場波動輕微",
+    "氣候條件維持平穩",
+    "空鷹航線順暢"
+  ];
+
+  if(eco.price > 150) return "市場價格小幅上升";
+  if(trans.delay > 30) return "空鷹交通出現延誤";
+  if(env.rain > 60) return "降雨影響部分農業";
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function generateArticle(env,eco,trans,soc){
 
-  return `
-空島通訊社報導：氣溫 ${env.temp.toFixed(1)}°C。
+  const base = [
+    `氣溫 ${env.temp.toFixed(1)}°C，整體氣候穩定。`,
+    `降雨指數 ${env.rain.toFixed(0)}，目前無重大異常。`,
+    `經濟指數 ${eco.price.toFixed(0)}，市場運作正常。`,
+    `交通延遲 ${trans.delay.toFixed(0)}%，空鷹運輸持續運作。`,
+    `各島系統維持基本穩定運行。`,
+    `報導編號 ${Math.random().toString(36).slice(2,8)}`
+  ];
 
-降雨狀況：${env.rain.toFixed(0)}。
-經濟指數：${eco.price.toFixed(0)}。
-交通延遲：${trans.delay.toFixed(0)}%。
-
-各島系統維持基本穩定運作。
-報導編號：${Math.random().toString(36).slice(2,8)}
-`;
+  return base.join(" ");
 }
 
 async function generateNewsBatch(world){
@@ -45,18 +54,14 @@ async function generateNewsBatch(world){
 
     let title = pickHeadline(env,eco,trans,soc);
 
+    // 🔥 加點變化
     if(Math.random() > 0.7){
-      title = "突發：空鷹航線異常";
+      title = "突發：空鷹航線短暫波動";
     }
 
     let draft = generateArticle(env,eco,trans,soc);
 
-    let content = draft;
-
-    // 🧠 如果 LLM 存在就潤稿
-    if(typeof polish === "function"){
-      content = await polish(draft);
-    }
+    let content = polish(draft);
 
     articles.push({
       title,
