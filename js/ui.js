@@ -35,5 +35,6 @@ function generate(){
 
     document.getElementById("mainText").innerText =
       "資料生成失敗，但UI仍可運作";
+    window.generate = generate;
   }
 }
