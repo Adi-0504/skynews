@@ -1,9 +1,10 @@
+
 let articles = [];
 let index = 0;
-let INIT_DONE = false;
+let loading = false;
 
 /* =========================
-   loading
+   loading 畫面
 ========================= */
 function showLoading(){
 
@@ -12,32 +13,38 @@ function showLoading(){
 }
 
 /* =========================
-   初始化（只跑一次🔥）
+   初始化新聞（可重複刷新🔥）
 ========================= */
 async function initializeNews(){
 
-  if(INIT_DONE) return;
-  INIT_DONE = true;
+  if(loading) return;
+  loading = true;
 
   showLoading();
 
+  // ⏳ 模擬 loading（5秒）
   await new Promise(r => setTimeout(r, 5000));
 
+  // 🧠 生成新聞
   articles = await generateNewsBatch(world);
 
   index = 0;
 
   render();
+
+  loading = false;
 }
 
 /* =========================
-   render（安全版）
+   render（防炸版本）
 ========================= */
 function render(){
 
   if(!articles || articles.length === 0){
+
     document.getElementById("headline").innerText = "尚未生成新聞";
     document.getElementById("mainText").innerText = "請稍候…";
+
     return;
   }
 
@@ -52,14 +59,14 @@ function render(){
   document.getElementById("mainText").innerText = a.content;
 
   document.getElementById("stats").innerHTML = `
-    <div>📰 第 ${index+1} / ${articles.length} 則</div>
+    <div>📰 第 ${index + 1} / ${articles.length} 則</div>
     <div>⏰ ${a.time}</div>
   `;
 
   const list = document.getElementById("newsList");
   list.innerHTML = "";
 
-  articles.forEach(n=>{
+  articles.forEach(n => {
     const div = document.createElement("div");
     div.className = "news-item";
     div.innerText = n.title;
@@ -68,26 +75,37 @@ function render(){
 }
 
 /* =========================
-   翻頁
+   下一則
 ========================= */
 function nextArticle(){
-  if(!articles.length) return;
-  index = (index + 1) % articles.length;
-  render();
-}
 
-function prevArticle(){
   if(!articles.length) return;
-  index = (index - 1 + articles.length) % articles.length;
+
+  index = (index + 1) % articles.length;
+
   render();
 }
 
 /* =========================
-   全域掛載
+   上一則
+========================= */
+function prevArticle(){
+
+  if(!articles.length) return;
+
+  index = (index - 1 + articles.length) % articles.length;
+
+  render();
+}
+
+/* =========================
+   掛到全域（HTML用）
 ========================= */
 window.initializeNews = initializeNews;
 window.nextArticle = nextArticle;
 window.prevArticle = prevArticle;
 
-/* ⚡ 自動啟動（只一次） */
+/* =========================
+   自動啟動
+========================= */
 window.onload = initializeNews;
