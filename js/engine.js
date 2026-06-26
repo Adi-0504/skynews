@@ -1,6 +1,6 @@
 
 /* =========================
-   📊 平均值
+   📊 平均
 ========================= */
 function avg(arr){
 
@@ -15,7 +15,7 @@ function avg(arr){
 }
 
 /* =========================
-   🌪 微變動（讓每篇不同）
+   🌪 微變動
 ========================= */
 function jitter(obj){
 
@@ -23,45 +23,14 @@ function jitter(obj){
 
   for(let k in obj){
     let v = obj[k] || 0;
-    out[k] = v * (0.82 + Math.random()*0.36);
+    out[k] = v * (0.85 + Math.random()*0.3);
   }
 
   return out;
 }
 
 /* =========================
-   🧠 事件池（核心）
-========================= */
-function randomEvent(){
-
-  const events = [
-    {
-      lead: "森林島上空觀測到雲層結構輕微異常",
-      detail: "雲層在中層氣流帶出現短暫偏移現象"
-    },
-    {
-      lead: "空鷹航線於平原島區域出現短暫延遲",
-      detail: "部分航道因氣流變化進行高度調整"
-    },
-    {
-      lead: "mato damu流通在礦山島出現波動",
-      detail: "交易節奏受到物流節點影響而略為放緩"
-    },
-    {
-      lead: "沙灘島觀測到局部浮雨增強現象",
-      detail: "雲層水氣密度短時間內上升"
-    },
-    {
-      lead: "浮空層監測到輕微氣流回旋",
-      detail: "該現象持續時間短暫，目前已逐步消散"
-    }
-  ];
-
-  return events[Math.floor(Math.random()*events.length)];
-}
-
-/* =========================
-   🎯 主題
+   🎯 主題（關鍵：一篇只選一個）
 ========================= */
 function pickTopic(){
 
@@ -69,65 +38,94 @@ function pickTopic(){
 
   if(r < 0.25) return "weather";
   if(r < 0.5) return "economy";
-  if(r < 0.7) return "transport";
-  if(r < 0.9) return "society";
-  return "breaking";
+  if(r < 0.75) return "transport";
+  return "society";
 }
 
 /* =========================
-   📰 標題（半正式）
+   📰 標題（專題型）
 ========================= */
-function pickHeadline(e){
+function pickHeadline(topic){
 
-  return `【空島通訊社報導】${e.lead}，相關單位持續監測中`;
+  if(topic === "weather") return "空島氣候系統觀測報告";
+  if(topic === "economy") return "四島經濟流動觀測專題";
+  if(topic === "transport") return "空鷹航運系統運作分析";
+  return "四島社會運作綜合觀察";
 }
 
 /* =========================
-   🧠 新聞稿生成（核心）
+   🧠 專題新聞生成（核心🔥）
 ========================= */
-function buildLongArticle(topic, env, eco, trans, soc){
+function buildTopicArticle(topic, env, eco, trans, soc){
 
-  const e = randomEvent();
+  if(topic === "weather"){
 
-  const intro = `
-空島通訊社報導。
+    return `
+【空島通訊社氣候專題】
 
-空島監測中心指出，今日觀測到一項浮空層變化事件，目前已啟動持續追蹤機制。
+本日空島氣候系統整體維持穩定，但雲層結構呈現緩慢變化趨勢。觀測中心指出，目前浮空層溫度約 ${env.temp.toFixed(1)}°C，雲帶分布較過去略為分散。
+
+森林島上空雲層厚度稍有增加，平原島則維持相對穩定的晴空環境。這種差異被認為與中層氣流循環有關。
+
+過去數小時內曾出現短暫浮雨現象，雖然持續時間不長，但顯示雲層水氣仍在局部積累。
+
+氣象單位指出，目前並無極端氣候跡象，但雲層流動速度的細微變化仍值得持續追蹤。
+
+整體而言，本日氣候屬於「穩定但持續變動」的狀態。
 `;
+  }
 
-  const lead = `
-本次事件為：${e.lead}。
-相關單位表示已完成初步數據收集。
+  if(topic === "economy"){
+
+    return `
+【空島通訊社經濟專題】
+
+mato damu流通系統今日維持穩定，但不同島嶼之間的交易活躍度出現差異。
+
+平原島農業輸出略為增加，顯示市場需求正在回升；礦山島則出現短暫減速，可能與運輸調度有關。
+
+經濟觀測單位指出，目前整體市場並未出現結構性變動，但區域性波動開始變得明顯。
+
+部分商會認為，空鷹航線的微幅延遲可能正在影響物流節奏，進而造成短期價格差異。
+
+整體來看，四島經濟仍處於穩定區間，但區域差異正在擴大。
 `;
+  }
 
-  const body1 = `
-根據觀測資料顯示，${e.detail}。
-該變化主要集中於局部區域，尚未影響整體浮空結構穩定性。
+  if(topic === "transport"){
+
+    return `
+【空島通訊社航運專題】
+
+空鷹航運系統今日運作大致穩定，但部分航線出現微幅調整。
+
+平均延遲率約 ${trans.delay.toFixed(0)}%，主要集中於中層氣流較不穩定的航段。
+
+馴鷹員表示，空鷹對氣流變化相當敏感，部分個體會主動降低飛行高度以避開不穩定區域。
+
+航運中心已調整部分航道配置，以維持四島之間的基本連結效率。
+
+目前整體物流仍正常運作，但航線穩定性正進入觀測階段。
 `;
+  }
 
-  const body2 = `
-氣象與浮空技術單位補充指出，目前系統整體運作正常。
-雖有短暫波動，但仍維持在安全監測範圍內。
+  return `
+【空島通訊社社會專題】
+
+四島社會運作今日維持穩定，各島居民生活節奏正常。
+
+市場、教育與基礎設施均持續運行，未觀測到重大異常事件。
+
+觀測資料顯示，居民活動密度略有上升，特別是在平原島市場區域。
+
+社會研究單位指出，目前整體社會穩定度維持良好，但仍需持續關注人口流動變化。
+
+整體而言，四島社會結構仍保持穩定。
 `;
-
-  const body3 = `
-空鷹航運系統已針對相關區域進行航線微調，以避免氣流不穩定區域。
-物流運作目前僅出現輕微延遲。
-`;
-
-  const body4 = `
-專家表示，此類浮空現象屬於常態性變化之一，通常會在短時間內自然消散。
-`;
-
-  const closing = `
-空島通訊社將持續追蹤本次事件後續發展，並更新最新觀測資訊。
-`;
-
-  return intro + lead + body1 + body2 + body3 + body4 + closing;
 }
 
 /* =========================
-   🚀 50則生成
+   🚀 50篇（每篇=不同主題專題）
 ========================= */
 async function generateNewsBatch(world){
 
@@ -140,21 +138,21 @@ async function generateNewsBatch(world){
 
   for(let i=0;i<50;i++){
 
+    const topic = pickTopic();
+
     const env = jitter(baseEnv);
     const eco = jitter(baseEco);
     const trans = jitter(baseTrans);
     const soc = jitter(baseSoc);
 
-    const e = randomEvent();
-
-    const title = pickHeadline(e);
-    const content = buildLongArticle("event", env, eco, trans, soc);
+    const title = pickHeadline(topic);
+    const content = buildTopicArticle(topic, env, eco, trans, soc);
 
     articles.push({
       title,
       content,
       time: new Date().toLocaleString(),
-      event: e
+      topic
     });
   }
 
