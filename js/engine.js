@@ -17,20 +17,25 @@ let worldState = {
 };
 
 /* =========================
-   🧪 DEBUG SYSTEM
+   🧪 DEBUG LOG（安全版）
 ========================= */
 
-function debugLog(msg, data){
-  console.log(`[空島DEBUG] ${msg}`, data || "");
+function debug(msg){
+  // 不依賴 console，不會炸
+  if(typeof document !== "undefined"){
+    const el = document.getElementById("debugBox");
+    if(el){
+      el.innerText = msg;
+    }
+  }
 }
 
 /* =========================
-   ⏱ 時間系統（20h / 65min）
+   ⏱ 時間
 ========================= */
 
 function tickTime(){
-
-  skyTime.minute += 1;
+  skyTime.minute++;
 
   if(skyTime.minute >= 65){
     skyTime.minute = 0;
@@ -44,53 +49,6 @@ function tickTime(){
 }
 
 /* =========================
-   🌿 季節
-========================= */
-
-function getSeason(day){
-
-  const d = day % 350;
-  const m = Math.floor(d / 35);
-
-  if(m <= 2) return "綠芽季";
-  if(m <= 4) return "熙陽季";
-  if(m <= 6) return "豐饒季";
-  if(m <= 8) return "寒霜季";
-  return "冰雪季";
-}
-
-/* =========================
-   🌅 時段
-========================= */
-
-function getTimePhase(hour){
-
-  if(hour < 7) return "凌晨觀測";
-  if(hour < 12) return "早間新聞";
-  if(hour < 16) return "午間速報";
-  if(hour < 20) return "傍晚報導";
-  return "夜間觀測";
-}
-
-/* =========================
-   🏪 市集
-========================= */
-
-function marketInfo(){
-
-  const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
-  const items = ["雲莓momu baru", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
-
-  const isOpen = skyTime.hour >= 6 && skyTime.hour <= 18;
-
-  return {
-    name: markets[Math.floor(Math.random()*markets.length)],
-    item: items[Math.floor(Math.random()*items.length)],
-    status: isOpen ? "營業中" : "休市"
-  };
-}
-
-/* =========================
    🌍 世界變動
 ========================= */
 
@@ -98,8 +56,6 @@ function updateWorld(){
   worldState.weather += (Math.random()-0.5)*2;
   worldState.economy += (Math.random()-0.5)*1.5;
   worldState.chaos += (Math.random()-0.5)*2;
-
-  debugLog("world update", worldState);
 }
 
 /* =========================
@@ -111,155 +67,135 @@ function isBreaking(){
 }
 
 /* =========================
-   📰 新聞
+   🏪 市集
 ========================= */
 
-function generateArticle(){
-
-  const market = marketInfo();
-  const phase = getTimePhase(skyTime.hour);
-  const season = getSeason(skyTime.day);
-
-  const breaking = isBreaking();
-
-  if(breaking){
-    return {
-      title: "🚨 BREAKING：空島氣流異常波動",
-      content: `
-【緊急觀測】
-
-氣流監測中心回報異常波動。
-
-- 空鷹航線調整中
-- 雲層密度變化
-- 系統進入監測模式
-
-時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
-`
-    };
-  }
+function marketInfo(){
+  const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
+  const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
 
   return {
-    title: `【${phase}】空島日常觀測`,
-    content: `
-【空島通訊社報導】
-
-本日第 ${skyTime.day} 天（${season}）
-
-🏪 ${market.name}
-狀態：${market.status}
-商品：${market.item}
-
-時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
-`
+    name: markets[Math.floor(Math.random()*markets.length)],
+    item: items[Math.floor(Math.random()*items.length)],
+    status: skyTime.hour >= 6 && skyTime.hour <= 18 ? "營業中" : "休市"
   };
 }
 
 /* =========================
-   🚀 生成
+   📰 新聞生成
+========================= */
+
+function generateArticle(){
+
+  const m = marketInfo();
+
+  if(isBreaking()){
+    return {
+      title: "🚨 BREAKING：空島氣流異常",
+      content: "氣流波動監測中，空鷹航線調整"
+    };
+  }
+
+  return {
+    title: `【空島日報】第${skyTime.day}天`,
+    content: `
+時間：${skyTime.hour}:${skyTime.minute}
+市場：${m.name} (${m.status})
+商品：${m.item}
+    `
+  };
+}
+
+/* =========================
+   🚀 spawn
 ========================= */
 
 function spawnNews(){
 
-  try{
+  updateWorld();
+  tickTime();
 
-    updateWorld();
-    tickTime();
+  const count = isBreaking() ? 3 : 1;
 
-    const count = isBreaking() ? 3 : 1;
-
-    for(let i=0;i<count;i++){
-      articles.unshift(generateArticle());
-    }
-
-    if(articles.length > 200){
-      articles = articles.slice(0, 200);
-    }
-
-    render();
-
-    debugLog("spawn ok", articles.length);
-
-  } catch(e){
-    console.error("❌ spawnNews crash:", e);
+  for(let i=0;i<count;i++){
+    articles.unshift(generateArticle());
   }
+
+  if(articles.length > 200){
+    articles.length = 200;
+  }
+
+  render();
 }
 
 /* =========================
-   🖥 UI RENDER（防炸版）
+   🖥 RENDER（100%防炸）
 ========================= */
 
 function render(){
 
-  try{
+  const list = document.getElementById("newsList");
+  const stats = document.getElementById("stats");
+  const marketBox = document.getElementById("marketBox");
+  const breaking = document.getElementById("breaking");
 
-    const list = document.getElementById("newsList");
-    const stats = document.getElementById("stats");
-    const breaking = document.getElementById("breaking");
-    const marketBox = document.getElementById("marketBox");
+  // 🔥 DOM 還沒好 → 不直接 return（避免白畫面）
+  if(!list){
+    debug("waiting DOM...");
+    return;
+  }
 
-    if(!list){
-      console.warn("⚠️ newsList not found");
-      return;
-    }
+  list.innerHTML = "";
 
-    list.innerHTML = "";
+  articles.forEach(a => {
+    const div = document.createElement("div");
+    div.className = "news-item";
+    div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
+    list.appendChild(div);
+  });
 
-    let hasBreaking = false;
+  if(stats){
+    stats.innerHTML =
+`第 ${skyTime.day} 天
+${skyTime.hour}:${skyTime.minute}
+新聞數：${articles.length}`;
+  }
 
-    articles.forEach(a => {
-
-      const div = document.createElement("div");
-      div.className = "news-item";
-      div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
-      list.appendChild(div);
-
-      if(a.title.includes("BREAKING")){
-        hasBreaking = true;
-      }
-    });
-
-    if(stats){
-      stats.innerHTML = `
-        🕒 第 ${skyTime.day} 天
-        ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
-        📰 ${articles.length} 則
-        🔥 chaos ${worldState.chaos.toFixed(2)}
-      `;
-    }
-
-    if(breaking){
-      breaking.style.display = hasBreaking ? "block" : "none";
-      breaking.innerText = "🚨 BREAKING LIVE";
-    }
-
-    if(marketBox){
-      const m = marketInfo();
-      marketBox.innerText =
+  if(marketBox){
+    const m = marketInfo();
+    marketBox.innerText =
 `🏪 ${m.name}
 ${m.status}
 ${m.item}`;
-    }
-
-  } catch(e){
-    console.error("❌ render crash:", e);
   }
+
+  if(breaking){
+    breaking.style.display = isBreaking() ? "block" : "none";
+    breaking.innerText = "🚨 BREAKING";
+  }
+
+  debug("engine running OK");
 }
 
 /* =========================
-   ▶️ INIT（關鍵修復🔥）
+   ▶️ INIT（超穩版本）
 ========================= */
 
 function init(){
-  debugLog("engine init start");
 
   articles = [];
 
-  render(); // 先畫第一幀
+  render(); // 先畫一次空畫面（不會壞）
+
+  spawnNews(); // 🔥 立刻有內容
 
   setInterval(spawnNews, 4000);
 
-  debugLog("engine ready");
+  debug("engine ready");
 }
 
-window.addEventListener("DOMContentLoaded", init);
+/* =========================
+   🚀 啟動（最穩寫法）
+========================= */
+
+init();
