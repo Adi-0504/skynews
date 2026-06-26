@@ -1,3 +1,4 @@
+
 function avg(arr){
 
   let keys = Object.keys(arr[0]);
@@ -10,6 +11,9 @@ function avg(arr){
   return out;
 }
 
+/* =========================
+   標題生成
+========================= */
 function pickHeadline(env,eco,trans,soc){
 
   const pool = [
@@ -27,6 +31,9 @@ function pickHeadline(env,eco,trans,soc){
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+/* =========================
+   生成原始新聞草稿
+========================= */
 function generateArticle(env,eco,trans,soc){
 
   const base = [
@@ -41,6 +48,9 @@ function generateArticle(env,eco,trans,soc){
   return base.join(" ");
 }
 
+/* =========================
+   生成10篇新聞（LLM版🔥）
+========================= */
 async function generateNewsBatch(world){
 
   const env = avg(world.env);
@@ -52,16 +62,23 @@ async function generateNewsBatch(world){
 
   for(let i=0;i<10;i++){
 
+    // 🧠 標題
     let title = pickHeadline(env,eco,trans,soc);
 
-    // 🔥 加點變化
+    // 🔥 增加隨機突發事件
     if(Math.random() > 0.7){
       title = "突發：空鷹航線短暫波動";
     }
 
+    // 📰 草稿
     let draft = generateArticle(env,eco,trans,soc);
 
-    let content = polish(draft);
+    // 🧠 LLM潤稿（關鍵修正 async）
+    let content = draft;
+
+    if(typeof polish === "function"){
+      content = await polish(draft);
+    }
 
     articles.push({
       title,
