@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sky News 空島新聞</title>
+
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- 🔝 BBC風頂欄 -->
+<div class="topbar">
+  <div class="logo">
+    <i class="fa-solid fa-globe"></i> SKY NEWS
+  </div>
+  <div>空島即時新聞系統</div>
+</div>
+
+<!-- 🧠 主體 -->
+<div class="layout">
+
+  <!-- 📰 主新聞（BBC） -->
+  <div class="main-news">
+    <h2 id="headline">等待新聞更新</h2>
+    <p id="mainText"></p>
+
+    <button onclick="generate()">更新新聞</button>
+  </div>
+
+  <!-- 📊 側欄（東森風） -->
+  <div class="sidebar">
+
+    <div id="stats"></div>
+
+    <div class="news-list" id="newsList"></div>
+
+  </div>
+
+</div>
+
+<script src="./js/utils.js"></script>
+<script src="./js/world.js"></script>
+<script src="./js/engine.js"></script>
+<script src="./js/ui.js"></script>
+
+</body>
+</html>
