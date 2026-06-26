@@ -17,6 +17,14 @@ let worldState = {
 };
 
 /* =========================
+   🧪 DEBUG SYSTEM
+========================= */
+
+function debugLog(msg, data){
+  console.log(`[空島DEBUG] ${msg}`, data || "");
+}
+
+/* =========================
    ⏱ 時間系統（20h / 65min）
 ========================= */
 
@@ -36,7 +44,7 @@ function tickTime(){
 }
 
 /* =========================
-   🌿 季節系統（350天）
+   🌿 季節
 ========================= */
 
 function getSeason(day){
@@ -87,10 +95,11 @@ function marketInfo(){
 ========================= */
 
 function updateWorld(){
-
   worldState.weather += (Math.random()-0.5)*2;
   worldState.economy += (Math.random()-0.5)*1.5;
   worldState.chaos += (Math.random()-0.5)*2;
+
+  debugLog("world update", worldState);
 }
 
 /* =========================
@@ -102,7 +111,7 @@ function isBreaking(){
 }
 
 /* =========================
-   📰 單篇新聞
+   📰 新聞
 ========================= */
 
 function generateArticle(){
@@ -111,17 +120,18 @@ function generateArticle(){
   const phase = getTimePhase(skyTime.hour);
   const season = getSeason(skyTime.day);
 
-  if(isBreaking()){
+  const breaking = isBreaking();
 
+  if(breaking){
     return {
       title: "🚨 BREAKING：空島氣流異常波動",
       content: `
 【緊急觀測】
 
-空島氣象中心偵測到異常氣流變動。
+氣流監測中心回報異常波動。
 
 - 空鷹航線調整中
-- 雲層密度上升
+- 雲層密度變化
 - 系統進入監測模式
 
 時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
@@ -136,10 +146,9 @@ function generateArticle(){
 
 本日第 ${skyTime.day} 天（${season}）
 
-系統觀測顯示整體運作穩定。
-
-🏪 ${market.name}：
-${market.status}｜今日商品：${market.item}
+🏪 ${market.name}
+狀態：${market.status}
+商品：${market.item}
 
 時間：${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
 `
@@ -147,85 +156,110 @@ ${market.status}｜今日商品：${market.item}
 }
 
 /* =========================
-   🚀 新聞生成流
+   🚀 生成
 ========================= */
 
 function spawnNews(){
 
-  updateWorld();
-  tickTime();
+  try{
 
-  const count = isBreaking() ? 3 : 1;
+    updateWorld();
+    tickTime();
 
-  for(let i=0;i<count;i++){
-    articles.unshift(generateArticle());
+    const count = isBreaking() ? 3 : 1;
+
+    for(let i=0;i<count;i++){
+      articles.unshift(generateArticle());
+    }
+
+    if(articles.length > 200){
+      articles = articles.slice(0, 200);
+    }
+
+    render();
+
+    debugLog("spawn ok", articles.length);
+
+  } catch(e){
+    console.error("❌ spawnNews crash:", e);
   }
-
-  if(articles.length > 200){
-    articles = articles.slice(0, 200);
-  }
-
-  render();
 }
 
 /* =========================
-   🖥 電視台 UI
+   🖥 UI RENDER（防炸版）
 ========================= */
 
 function render(){
 
-  const list = document.getElementById("newsList");
-  const breaking = document.getElementById("breaking");
-  const stats = document.getElementById("stats");
-  const marketBox = document.getElementById("marketBox");
+  try{
 
-  if(!list) return;
+    const list = document.getElementById("newsList");
+    const stats = document.getElementById("stats");
+    const breaking = document.getElementById("breaking");
+    const marketBox = document.getElementById("marketBox");
 
-  list.innerHTML = "";
-
-  let hasBreaking = false;
-
-  articles.forEach(a => {
-
-    const div = document.createElement("div");
-    div.className = "news-item";
-    div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
-    list.appendChild(div);
-
-    if(a.title.includes("BREAKING")){
-      hasBreaking = true;
+    if(!list){
+      console.warn("⚠️ newsList not found");
+      return;
     }
-  });
 
-  /* 🚨 BREAKING 顯示 */
-  if(breaking){
-    if(hasBreaking){
-      breaking.style.display = "block";
-      breaking.innerText = "🚨 BREAKING NEWS LIVE";
-    } else {
-      breaking.style.display = "none";
+    list.innerHTML = "";
+
+    let hasBreaking = false;
+
+    articles.forEach(a => {
+
+      const div = document.createElement("div");
+      div.className = "news-item";
+      div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
+      list.appendChild(div);
+
+      if(a.title.includes("BREAKING")){
+        hasBreaking = true;
+      }
+    });
+
+    if(stats){
+      stats.innerHTML = `
+        🕒 第 ${skyTime.day} 天
+        ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}
+        📰 ${articles.length} 則
+        🔥 chaos ${worldState.chaos.toFixed(2)}
+      `;
     }
-  }
 
-  /* 📊 狀態欄 */
-  stats.innerHTML = `
-    🕒 第 ${skyTime.day} 天<br>
-    ⏰ ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}<br>
-    🌿 ${getSeason(skyTime.day)}<br>
-    📡 ${getTimePhase(skyTime.hour)}<br>
-    📰 ${articles.length} 則新聞
-  `;
+    if(breaking){
+      breaking.style.display = hasBreaking ? "block" : "none";
+      breaking.innerText = "🚨 BREAKING LIVE";
+    }
 
-  /* 🏪 市集 */
-  const m = marketInfo();
-  marketBox.innerText =
+    if(marketBox){
+      const m = marketInfo();
+      marketBox.innerText =
 `🏪 ${m.name}
-狀態：${m.status}
-今日商品：${m.item}`;
+${m.status}
+${m.item}`;
+    }
+
+  } catch(e){
+    console.error("❌ render crash:", e);
+  }
 }
 
 /* =========================
-   ▶️ 啟動
+   ▶️ INIT（關鍵修復🔥）
 ========================= */
 
-setInterval(spawnNews, 4000);
+function init(){
+  debugLog("engine init start");
+
+  articles = [];
+
+  render(); // 先畫第一幀
+
+  setInterval(spawnNews, 4000);
+
+  debugLog("engine ready");
+}
+
+window.addEventListener("DOMContentLoaded", init);
