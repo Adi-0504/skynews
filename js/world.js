@@ -1,15 +1,14 @@
-let world = createWorld();
+let world = {
+  env: [],
+  economy: [],
+  transport: [],
+  society: []
+};
 
-function createWorld(){
-  return {
-    env: [],
-    economy: [],
-    transport: [],
-    society: []
-  };
+function rand(min,max){
+  return Math.random()*(max-min)+min;
 }
 
-// 初始化資料（保留你的500+變數概念）
 for(let i=0;i<200;i++){
   world.env.push({
     temp: rand(10,35),
