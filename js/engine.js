@@ -27,111 +27,95 @@ function jitter(obj){
 }
 
 /* =========================
-   🧠 主題分配器
+   主題
 ========================= */
 function pickTopic(){
 
   const r = Math.random();
 
   if(r < 0.25) return "weather";
-  if(r < 0.5)  return "economy";
-  if(r < 0.7)  return "transport";
-  if(r < 0.9)  return "society";
+  if(r < 0.5) return "economy";
+  if(r < 0.7) return "transport";
+  if(r < 0.9) return "society";
   return "breaking";
 }
 
 /* =========================
-   標題生成（依主題）
+   標題
 ========================= */
-function pickHeadline(topic, env, eco, trans, soc){
+function pickHeadline(topic, env,eco,trans,soc){
 
   if(topic === "weather"){
-    return "氣候觀測：空島天氣系統穩定運作";
+    return "氣候觀測：空島天氣系統維持穩定";
   }
 
   if(topic === "economy"){
-    if(eco.price > 150) return "市場價格出現上升壓力";
-    return "經濟活動維持穩定";
+    return eco.price > 150
+      ? "市場價格出現上升趨勢"
+      : "經濟活動維持穩定運作";
   }
 
   if(topic === "transport"){
-    if(trans.delay > 30) return "空鷹航線出現延誤";
-    return "空鷹運輸系統正常運行";
+    return trans.delay > 30
+      ? "空鷹航線出現延誤情況"
+      : "空鷹運輸系統正常運行";
   }
 
   if(topic === "society"){
-    return "四島社會運作穩定";
+    return "四島社會運作持續穩定";
   }
 
-  if(topic === "breaking"){
-    return "突發：空鷹航線氣流異常事件";
-  }
-
-  return "空島新聞更新";
+  return "突發：空鷹航線氣流異常事件";
 }
 
 /* =========================
-   📰 依主題生成內文
+   🧠 核心長文生成（重點🔥）
 ========================= */
-function generateArticle(topic, env,eco,trans,soc){
+function buildLongArticle(topic, env,eco,trans,soc){
 
-  const noise = Math.random();
-
-  if(topic === "weather"){
-
-    return `
-空島通訊社氣象中心指出，目前四島氣候系統維持穩定運作。
-
-觀測數據顯示，平均氣溫約 ${(env.temp+noise).toFixed(1)}°C，降雨指數 ${(env.rain+noise*10).toFixed(0)}。
-雲層分布呈現輕微變化，但尚未達到警戒標準。
-
-氣象單位表示，目前沒有極端氣候事件發生，各島居民活動可正常進行。
+  const baseIntro = `
+空島通訊社綜合報導指出，本日四島系統仍維持穩定運作。根據最新觀測數據顯示，各項指標雖出現微幅波動，但整體仍在安全範圍內。
 `;
-  }
 
-  if(topic === "economy"){
-
-    return `
-經濟觀測報告指出，目前市場活動持續穩定。
-
-市場指數約 ${(eco.price+noise*5).toFixed(0)}，部分商品價格出現小幅波動。
-分析指出，這與近期物流調整與需求變化有關。
-
-整體而言，經濟系統仍維持健康運作狀態。
+  const weather = `
+【氣候分析】
+目前平均氣溫約 ${(env.temp).toFixed(1)}°C，降雨指數 ${(env.rain).toFixed(0)}。
+氣象中心表示，本週雲層結構呈現周期性變化，部分區域可能出現短暫降雨，但不影響整體活動。
 `;
-  }
 
-  if(topic === "transport"){
-
-    return `
-空鷹交通中心發布最新運輸報告。
-
-目前航線延遲率約 ${(trans.delay+noise*3).toFixed(0)}%，部分航班受到氣流影響。
-但整體航運系統仍維持穩定，未出現大規模延誤。
-
-交通單位持續監控風場變化，以確保安全。
+  const economy = `
+【經濟觀察】
+市場指數目前約 ${(eco.price).toFixed(0)}，顯示市場仍處於穩定狀態。
+然而部分農產品與礦產交易價格出現波動，分析指出這與物流調整及需求變化有關。
 `;
-  }
 
-  if(topic === "society"){
-
-    return `
-社會運作觀察報告指出，各島居民生活秩序穩定。
-
-教育、市場與日常活動均正常進行，社會信心維持高點。
-目前未觀察到重大社會事件或異常情況。
+  const transport = `
+【交通運輸】
+空鷹航線延遲率約 ${(trans.delay).toFixed(0)}%。
+雖然部分航線受到氣流影響，但整體運輸效率仍維持穩定。
 `;
-  }
 
-  return `
-突發事件通報：空鷹航線出現短暫氣流異常。
-
-相關單位已介入調查，目前部分航線延後，但未造成重大影響。
+  const society = `
+【社會狀態】
+各島居民生活節奏穩定，市場與教育活動正常進行。
+社會信心維持高點，未觀測到重大異常事件。
 `;
+
+  const expand = `
+【延伸觀察】
+專家指出，目前系統穩定性雖高，但仍需持續監控氣候與物流變化。
+未來幾日可能出現輕微波動，相關單位已啟動預防機制。
+`;
+
+  const conclusion = `
+綜合評估顯示，四島系統整體維持穩定運作狀態，短期內無重大風險。
+`;
+
+  return baseIntro + weather + economy + transport + society + expand + conclusion;
 }
 
 /* =========================
-   🚀 每日50則（主題版）
+   🚀 每日50則（長文版）
 ========================= */
 async function generateNewsBatch(world){
 
@@ -153,10 +137,18 @@ async function generateNewsBatch(world){
 
     const title = pickHeadline(topic, env,eco,trans,soc);
 
-    let content = generateArticle(topic, env,eco,trans,soc);
+    let content = buildLongArticle(topic, env,eco,trans,soc);
 
+    /* ⚠️ 重點修正：
+       LLM 只能「加長」，不能「摘要」
+    */
     if(typeof polish === "function"){
-      content = await polish(content);
+      const extra = await polish(content);
+
+      // 🧠 避免被縮短
+      if(extra && extra.length > content.length){
+        content = extra;
+      }
     }
 
     articles.push({
