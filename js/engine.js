@@ -1,46 +1,30 @@
+
 /* =========================
-🌍 空島世界資料層
+🌍 世界資料
 ========================= */
 
-const cities = [
-  "莫雷","比亞","卡諾","索維","雷瓦","奧恩","拉維爾","希諾","維卡","多恩",
-  "米蘭","克羅","塔維","諾亞","薩恩","布拉","維諾","哈爾","奧瑞","利亞",
-  "格恩","索拉","米卡","杜恩","洛維"
-]; // 25城
+const cities = ["莫雷","比亞","卡諾","索維","雷瓦","奧恩","拉維爾","希諾","維卡","多恩","米蘭","克羅","塔維","諾亞","薩恩","布拉","維諾","哈爾","奧瑞","利亞","格恩","索拉","米卡","杜恩","洛維"];
 
-const villages = [
-  "薩拉村","米諾村","洛森村","卡里村","風葉村","灰岩村","白砂村","雲谷村","木溪村","石原村",
-  "霧川村","青禾村","北嶺村","南霧村","月溪村","星落村","海風村","雨林村","火石村","銀川村",
-  "寒霜村","暖谷村","風港村","鐵木村","石橋村","草原村","雲石村","夜林村","晨曦村","風嵐村",
-  "沙灣村","黑岩村","白霧村","綠田村","藍灣村","赤土村","冷溪村","暖風村","遠山村","霜葉村",
-  "光谷村","影林村","雲岬村","風嶼村","星河村","雷鳴村","靜水村","灰谷村","白川村","風砂村"
-]; // 50+
+const villages = ["薩拉村","米諾村","洛森村","卡里村","風葉村","灰岩村","白砂村","雲谷村","木溪村","石原村","霧川村","青禾村","北嶺村","南霧村","月溪村","星落村","海風村","雨林村","火石村","銀川村","寒霜村","暖谷村","風港村","鐵木村","石橋村","草原村","雲石村","夜林村","晨曦村","風嵐村","沙灣村","黑岩村","白霧村","綠田村","藍灣村","赤土村","冷溪村","暖風村","遠山村","霜葉村","光谷村","影林村","雲岬村","風嶼村","星河村","雷鳴村","靜水村","灰谷村","白川村","風砂村"];
 
 const world = {
   year: 1353,
-  months: [
-    "綠芽月","細雨月","花落月","熙陽月","綠葉月",
-    "秋楓月","豐饒月","星空月","寒霜月","冰雪月"
-  ]
+  months: ["綠芽月","細雨月","花落月","熙陽月","綠葉月","秋楓月","豐饒月","星空月","寒霜月","冰雪月"]
 };
-
-/* =========================
-🧠 系統狀態
-========================= */
 
 const memory = {
   day: 1,
-  report: null
+  reports: {} // 👈 改：存歷史
 };
 
 /* =========================
-🎲 工具
+工具
 ========================= */
 
 const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 /* =========================
-🧭 時間系統
+時間
 ========================= */
 
 function getTime(day){
@@ -54,171 +38,184 @@ function getTime(day){
 }
 
 /* =========================
-🌍 地圖選擇（城市 or 村）
+事件生成（40個，不再爆炸）
 ========================= */
 
-function pickLocation(){
-  const isCity = Math.random() < 0.4; // 城市40%，村落60%
+function makeEvents(){
+  const pool = ["market","logistics","population","incident","rumor","weather"];
 
-  if(isCity){
-    return {
-      type: "city",
-      name: r(cities)
-    };
-  }else{
-    return {
-      type: "village",
-      name: r(villages)
-    };
-  }
+  const locations = [...cities, ...villages];
+
+  return Array.from({length:40}).map(()=>({
+    place: r(locations),
+    type: r(pool)
+  }));
 }
 
 /* =========================
-⚡ 事件類型
+事件分類（關鍵升級）
 ========================= */
 
-function eventType(){
+function classify(events){
 
-  const pool = [
-    "market","market","market","market",
-    "logistics","logistics","logistics",
-    "population","population",
-    "incident",
-    "rumor",
-    "weather"
-  ];
-
-  return r(pool);
-}
-
-/* =========================
-🧠 單一事件
-========================= */
-
-function event(){
-
-  const loc = pickLocation();
-
-  return {
-    location: loc.name,
-    scope: loc.type,
-    type: eventType()
+  const groups = {
+    market: [],
+    logistics: [],
+    population: [],
+    incident: [],
+    rumor: [],
+    weather: []
   };
+
+  for(const e of events){
+    groups[e.type].push(e);
+  }
+
+  return groups;
 }
 
 /* =========================
-📰 事件轉文字（穩定輸出）
+轉成「故事」不是句子
 ========================= */
 
-function narrate(e){
+function buildStory(type, list){
 
-  if(!e) return "觀測資料不足，無法生成內容。";
+  const placeCount = {};
 
-  const place = e.location;
+  for(const e of list){
+    placeCount[e.place] = (placeCount[e.place] || 0) + 1;
+  }
 
-  switch(e.type){
+  const topPlaces = Object.entries(placeCount)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
+    .map(x=>x[0]);
+
+  switch(type){
 
     case "market":
-      return `${place}市場活動明顯上升，人流集中於主要交易點，部分攤位出現排隊現象，交易節奏加快。`;
+      return `
+今日空島多個地區市場活動同步升溫，其中 ${topPlaces.join("、")} 成為主要交易集中區。
+
+觀測顯示，這些區域的貨物流動明顯加快，尤其是糧食與手工製品需求上升最為明顯。部分攤位出現長時間排隊現象，顯示短期需求正在集中爆發。
+
+專家認為，這種現象通常與跨島補給週期有關，可能代表下一輪物流調整即將開始。
+`;
 
     case "logistics":
-      return `${place}補給路線出現延遲，物資流動速度下降，部分貨物流向鄰近節點調整。`;
+      return `
+本日空島物流系統出現局部延遲，主要集中於 ${topPlaces.join("、")} 一帶。
+
+空鷹運輸節點回報顯示，部分航線調度時間延長，導致貨物流轉效率下降。雖然整體系統仍維持運作，但部分物資已改道至鄰近城市處理。
+
+若此狀態持續，可能會影響下一階段的市場供應節奏。
+`;
 
     case "population":
-      return `${place}人口流動出現集中趨勢，短時間內形成明顯聚集熱點。`;
+      return `
+人口流動在 ${topPlaces.join("、")} 出現明顯集中趨勢。
 
-    case "incident":
-      return `${place}出現異常事件紀錄，局部系統監測到不穩定波動，但未擴散。`;
+短時間內大量居民向特定區域移動，使得部分市場與補給點承受額外壓力。此類現象通常與交易機會或資源分配變化有關。
 
-    case "rumor":
-      return `${place}出現資訊流動異常，當地居民對未確認消息產生討論與關注。`;
+目前尚未觀測到擁擠失控，但區域管理已開始進行流量調整。
+`;
 
     case "weather":
-      return `${place}氣候條件出現變化，風流與雲層密度短期波動明顯。`;
+      return `
+空島氣候系統在 ${topPlaces.join("、")} 出現短期波動。
+
+風流密度與雲層結構變化，使部分空鷹航線需調整飛行高度。雖未造成中斷，但已影響運輸效率。
+
+氣象觀測中心表示，此類變動通常持續時間不長，但仍需持續監控。
+`;
+
+    case "rumor":
+      return `
+資訊流動異常在 ${topPlaces.join("、")} 擴散。
+
+當地居民之間出現大量未經確認的消息交流，主要集中在資源分配與市場變動議題上。雖未造成實質混亂，但已影響部分交易信心。
+
+目前管理單位已開始介入資訊整理。
+`;
+
+    case "incident":
+      return `
+局部區域在 ${topPlaces.join("、")} 出現異常事件紀錄。
+
+監測系統顯示短暫不穩定波動，但未形成跨區連鎖反應。事件細節仍在調查中，目前未影響主要城市運作。
+
+系統評估為低風險等級。
+`;
 
     default:
-      return `${place}出現一般性活動變化。`;
+      return `系統出現一般性變化。`;
   }
 }
 
 /* =========================
-📦 生成當日事件
-========================= */
-
-function generateEvents(){
-
-  const events = [];
-
-  for(let i=0;i<140;i++){
-    events.push(event());
-  }
-
-  return events;
-}
-
-/* =========================
-📰 生成長篇新聞（10篇）
+生成專題
 ========================= */
 
 function generateReport(day){
 
-  const events = generateEvents();
+  const events = makeEvents();
+  const groups = classify(events);
 
-  let html = `
-<div class="headline">空島跨區域深度觀測日報</div>
-<p>${getTime(day)}</p>
-<p>本日監測資料整理為10篇區域報導如下：</p>
-`;
+  const stories = [];
 
-  const chunkSize = Math.floor(events.length / 10);
-
-  for(let i=0;i<10;i++){
-
-    const chunk = events.slice(i*chunkSize, (i+1)*chunkSize);
-
-    html += `
-<div class="article">
-<div class="title">第${i+1}則｜區域觀測報導</div>
-<p>
-`;
-
-    for(const e of chunk){
-      html += narrate(e) + "<br><br>";
+  for(const key in groups){
+    if(groups[key].length > 0){
+      stories.push(buildStory(key, groups[key]));
     }
+  }
 
-    html += `
+  // 只取 3~5篇
+  const finalStories = stories.slice(0,5);
+
+  const title = `
+<div class="headline">
+空島跨區域觀測報導
+</div>
+<p>${getTime(day)}</p>
+`;
+
+  const body = finalStories.map((s,i)=>`
+<div class="article">
+<div class="title">專題 ${i+1}</div>
+<p>${s}</p>
+</div>
+`).join("");
+
+  const footer = `
+<div class="article">
+<div class="title">總體觀測</div>
+<p>
+今日空島整體維持穩定，但局部市場與物流系統出現輕微波動。
+事件未形成連鎖效應，系統仍處於可控範圍。
 </p>
 </div>
 `;
-  }
 
-  html += `
-<div class="headline">總體觀測</div>
-<p>
-今日空島整體維持穩定結構。城市層面呈現交易活躍與物流調整並行的狀態，而村落則以人口流動與補給變化為主。雖然局部區域出現短期波動，但未觀測到跨區連鎖效應，系統仍處於安全範圍內。
-</p>
-`;
-
-  return html;
+  return title + body + footer;
 }
 
 /* =========================
-🖥 render
+render + history
 ========================= */
 
 function render(){
 
   document.getElementById("time").innerText = getTime(memory.day);
 
-  if(!memory.report){
-    memory.report = generateReport(memory.day);
+  if(!memory.reports[memory.day]){
+    memory.reports[memory.day] = generateReport(memory.day);
   }
 
-  document.getElementById("content").innerHTML = memory.report;
+  document.getElementById("content").innerHTML = memory.reports[memory.day];
 }
 
 /* =========================
-🎯 初始化
+init
 ========================= */
 
 function init(){
@@ -226,14 +223,12 @@ function init(){
   document.getElementById("prevBtn").addEventListener("click", ()=>{
     if(memory.day > 1){
       memory.day--;
-      memory.report = null;
       render();
     }
   });
 
   document.getElementById("nextBtn").addEventListener("click", ()=>{
     memory.day++;
-    memory.report = null;
     render();
   });
 
