@@ -17,21 +17,16 @@ let worldState = {
 };
 
 /* =========================
-   🧪 DEBUG LOG（安全版）
+   🧪 DEBUG
 ========================= */
 
 function debug(msg){
-  // 不依賴 console，不會炸
-  if(typeof document !== "undefined"){
-    const el = document.getElementById("debugBox");
-    if(el){
-      el.innerText = msg;
-    }
-  }
+  const el = document.getElementById("debugBox");
+  if(el) el.innerText = msg;
 }
 
 /* =========================
-   ⏱ 時間
+   ⏱ 時間系統（20h / 65min）
 ========================= */
 
 function tickTime(){
@@ -53,9 +48,9 @@ function tickTime(){
 ========================= */
 
 function updateWorld(){
-  worldState.weather += (Math.random()-0.5)*2;
-  worldState.economy += (Math.random()-0.5)*1.5;
-  worldState.chaos += (Math.random()-0.5)*2;
+  worldState.weather += (Math.random() - 0.5) * 2;
+  worldState.economy += (Math.random() - 0.5) * 1.5;
+  worldState.chaos += (Math.random() - 0.5) * 2;
 }
 
 /* =========================
@@ -67,47 +62,48 @@ function isBreaking(){
 }
 
 /* =========================
-   🏪 市集
+   🏪 市集（穩定版本）
 ========================= */
 
-function marketInfo(){
-  const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
-  const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
+const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
+const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
 
+function marketInfo(){
   return {
-    name: markets[Math.floor(Math.random()*markets.length)],
-    item: items[Math.floor(Math.random()*items.length)],
+    name: markets[Math.floor(Math.random() * markets.length)],
+    item: items[Math.floor(Math.random() * items.length)],
     status: skyTime.hour >= 6 && skyTime.hour <= 18 ? "營業中" : "休市"
   };
 }
 
 /* =========================
-   📰 新聞生成
+   📰 新聞生成（優化版）
 ========================= */
 
 function generateArticle(){
 
   const m = marketInfo();
 
+  const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
+
   if(isBreaking()){
     return {
       title: "🚨 BREAKING：空島氣流異常",
-      content: "氣流波動監測中，空鷹航線調整"
+      content: `氣流波動監測中，空鷹航線調整\n時間：${time}`
     };
   }
 
   return {
     title: `【空島日報】第${skyTime.day}天`,
-    content: `
-時間：${skyTime.hour}:${skyTime.minute}
+    content:
+`時間：${time}
 市場：${m.name} (${m.status})
-商品：${m.item}
-    `
+商品：${m.item}`
   };
 }
 
 /* =========================
-   🚀 spawn
+   🚀 主循環
 ========================= */
 
 function spawnNews(){
@@ -117,19 +113,20 @@ function spawnNews(){
 
   const count = isBreaking() ? 3 : 1;
 
-  for(let i=0;i<count;i++){
+  for(let i = 0; i < count; i++){
     articles.unshift(generateArticle());
   }
 
-  if(articles.length > 200){
-    articles.length = 200;
+  // 防爆（只保留最新 100）
+  if(articles.length > 100){
+    articles = articles.slice(0, 100);
   }
 
   render();
 }
 
 /* =========================
-   🖥 RENDER（100%防炸）
+   🖥 RENDER（電視台版）
 ========================= */
 
 function render(){
@@ -139,26 +136,30 @@ function render(){
   const marketBox = document.getElementById("marketBox");
   const breaking = document.getElementById("breaking");
 
-  // 🔥 DOM 還沒好 → 不直接 return（避免白畫面）
-  if(!list){
-    debug("waiting DOM...");
-    return;
-  }
+  if(!list) return;
 
   list.innerHTML = "";
 
   articles.forEach(a => {
+
     const div = document.createElement("div");
     div.className = "news-item";
-    div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
+
+    div.innerHTML = `
+      <div class="news-title">${a.title}</div>
+      <div class="news-content">${a.content}</div>
+    `;
+
     list.appendChild(div);
   });
 
   if(stats){
-    stats.innerHTML =
-`第 ${skyTime.day} 天
-${skyTime.hour}:${skyTime.minute}
-新聞數：${articles.length}`;
+    stats.innerHTML = `
+      🕒 第 ${skyTime.day} 天<br>
+      ⏰ ${skyTime.hour}:${skyTime.minute}<br>
+      📰 ${articles.length}<br>
+      🌪 chaos ${worldState.chaos.toFixed(1)}
+    `;
   }
 
   if(marketBox){
@@ -171,31 +172,23 @@ ${m.item}`;
 
   if(breaking){
     breaking.style.display = isBreaking() ? "block" : "none";
-    breaking.innerText = "🚨 BREAKING";
+    breaking.innerText = "🚨 BREAKING LIVE";
   }
-
-  debug("engine running OK");
 }
 
 /* =========================
-   ▶️ INIT（超穩版本）
+   ▶️ INIT
 ========================= */
 
 function init(){
 
   articles = [];
 
-  render(); // 先畫一次空畫面（不會壞）
-
-  spawnNews(); // 🔥 立刻有內容
+  spawnNews();
 
   setInterval(spawnNews, 4000);
 
   debug("engine ready");
 }
-
-/* =========================
-   🚀 啟動（最穩寫法）
-========================= */
 
 init();
