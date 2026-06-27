@@ -1,132 +1,92 @@
-/* =========================
-   🌿 基底風格
-========================= */
-
-body{
-  margin:0;
-  background:#f5f1e6;
-  color:#1f2d1f;
-  font-family: "Arial", sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #f4f1e6;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
-/* =========================
-   📺 外層
-========================= */
-
-.tv-container{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
+/* 外層 */
+.tv-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* =========================
-   📡 上方標題
-========================= */
-
-.topbar{
-  background:#1f3d2b;
-  color:#f5f1e6;
-  padding:14px 16px;
-  font-weight:bold;
-  letter-spacing:2px;
+/* 頂部 */
+.topbar {
+  padding: 12px;
+  background: #1f3b2c;
+  color: #f4f1e6;
+  font-weight: bold;
+  letter-spacing: 2px;
 }
 
-/* =========================
-   🧱 主體（RWD重點）
-========================= */
-
-.tv-layout{
-  flex:1;
-  display:flex;
-  gap:10px;
-  padding:10px;
+/* 主區 */
+.tv-layout-wrapper {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
 }
 
-/* 手機版 */
-@media (max-width: 768px){
-  .tv-layout{
-    flex-direction:column;
-  }
+/* 新聞 */
+.news-panel {
+  flex: 3;
+  padding: 12px;
+  overflow-y: auto;
 }
 
-/* =========================
-   📰 新聞區
-========================= */
-
-.news-panel{
-  flex:2;
-  overflow-y:auto;
+/* 側欄 */
+.side-panel {
+  flex: 1;
+  padding: 12px;
+  border-left: 1px solid #c9c2b2;
+  background: #faf7ef;
 }
 
-/* =========================
-   📊 側欄
-========================= */
-
-.side-panel{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+/* 新聞卡 */
+.news-item {
+  background: white;
+  border-left: 4px solid #1f3b2c;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 8px;
 }
 
-/* =========================
-   📰 新聞卡（報紙風）
-========================= */
-
-.news-item{
-  background:#fffdf6;
-  border-left:5px solid #2f5d3a;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:6px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+/* 標題 */
+.news-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #1f3b2c;
 }
 
-.news-title{
-  font-weight:bold;
-  margin-bottom:6px;
+/* 內容 */
+.news-content {
+  font-size: 14px;
+  white-space: pre-line;
+  color: #333;
 }
 
-.news-content{
-  white-space:pre-line;
-  font-size:14px;
-  line-height:1.5;
+/* breaking */
+#breaking {
+  background: #8b1e1e;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  display: none;
 }
 
-/* =========================
-   🚨 BREAKING
-========================= */
-
-#breaking{
-  display:none;
-  background:#7a1f1f;
-  color:#ffecec;
-  padding:10px;
-  border-radius:6px;
-  font-weight:bold;
+/* stats */
+.stats-box {
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: #1f3b2c;
 }
 
-/* =========================
-   📊 stats
-========================= */
-
-.stats-box{
-  background:#1b2b1f;
-  color:#f5f1e6;
-  padding:10px;
-  border-radius:6px;
-  font-size:13px;
-}
-
-/* =========================
-   🏪 market
-========================= */
-
-.market-box{
-  background:#152017;
-  color:#f5f1e6;
-  padding:10px;
-  border-radius:6px;
-  white-space:pre-line;
-  font-size:13px;
+/* market */
+.market-box {
+  font-size: 13px;
+  white-space: pre-line;
 }
