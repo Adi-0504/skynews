@@ -1,10 +1,9 @@
-
 /* =========================
-   🌍 基礎世界狀態
+   🌍 SKY NEWS 3.0
 ========================= */
 
 let articles = [];
-let history = [];
+let eventMemory = new Set();
 
 let skyTime = {
   day: 1,
@@ -13,82 +12,34 @@ let skyTime = {
 };
 
 let worldState = {
-  stability: 100,
-  tension: 0,
-  flow: 0
+  chaos: 0,
+  economy: 100,
+  logistics: 0,
+  climate: 0
 };
 
 /* =========================
-   🧭 敘事方向（逆向核心）
+   🧠 事件池（變多＝不會膩）
 ========================= */
 
-const narrativeTypes = [
-  "stability",
-  "tension",
-  "growth"
+const markets = [
+  "薩拉村聚落", "卡諾聚落交易區", "雷瓦村市場",
+  "莫爾聚落", "塔西聚落市集", "烏拉聚落交易站"
+];
+
+const items = [
+  "空鷹羽飾", "雲莓", "波光鹽", "森椒", "椰子飲品"
+];
+
+const eventTypes = [
+  "climate", "logistics", "economy", "population"
 ];
 
 /* =========================
-   🧠 選擇敘事（不是隨機事件，是“敘事框架”）
-========================= */
-
-function chooseNarrative(){
-
-  // 🔥 讓世界「偏移」，不是純random
-  const weights = {
-    stability: worldState.stability > 110 ? 0.5 : 1.2,
-    tension: worldState.tension > 8 ? 1.5 : 1,
-    growth: worldState.flow > 5 ? 1.3 : 1
-  };
-
-  let pool = [];
-
-  narrativeTypes.forEach(type => {
-    const w = Math.floor(weights[type] * 10);
-
-    for(let i = 0; i < w; i++){
-      pool.push(type);
-    }
-  });
-
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-/* =========================
-   🧠 逆向影響世界（新聞 → 世界）
-========================= */
-
-function applyNarrativeBias(type){
-
-  if(type === "stability"){
-    worldState.stability += 2;
-    worldState.tension -= 1;
-    worldState.flow += 0.5;
-  }
-
-  if(type === "tension"){
-    worldState.tension += 2;
-    worldState.stability -= 1;
-    worldState.flow += 0.2;
-  }
-
-  if(type === "growth"){
-    worldState.flow += 2;
-    worldState.stability += 1;
-  }
-
-  // 🔒 限制範圍
-  worldState.stability = clamp(worldState.stability, 0, 150);
-  worldState.tension = clamp(worldState.tension, 0, 20);
-  worldState.flow = clamp(worldState.flow, 0, 20);
-}
-
-/* =========================
-   ⏱ 時間系統
+   ⏱ 時間
 ========================= */
 
 function tickTime(){
-
   skyTime.minute++;
 
   if(skyTime.minute >= 65){
@@ -99,26 +50,38 @@ function tickTime(){
   if(skyTime.hour >= 20){
     skyTime.hour = 0;
     skyTime.day++;
-    saveHistory();
+    eventMemory.clear(); // 🔥 每天才重置事件記憶
   }
 }
 
 /* =========================
-   📦 歷史系統（世界記錄）
+   🧠 世界演化（互相影響）
 ========================= */
 
-function saveHistory(){
+function updateWorld(eventType){
 
-  history.push({
-    day: skyTime.day,
-    stability: worldState.stability,
-    tension: worldState.tension,
-    flow: worldState.flow
-  });
-
-  if(history.length > 50){
-    history.shift();
+  if(eventType === "economy"){
+    worldState.economy += (Math.random() * 2 - 1);
+    worldState.logistics += Math.random() * 0.5;
   }
+
+  if(eventType === "logistics"){
+    worldState.logistics += (Math.random() * 2 - 1);
+    worldState.chaos += 0.3;
+  }
+
+  if(eventType === "climate"){
+    worldState.climate += (Math.random() * 2 - 1);
+    worldState.logistics += 0.2;
+  }
+
+  if(eventType === "population"){
+    worldState.chaos += (Math.random() * 0.5);
+    worldState.economy += 0.3;
+  }
+
+  // 限制
+  worldState.chaos = clamp(worldState.chaos, -10, 10);
 }
 
 /* =========================
@@ -130,62 +93,88 @@ function clamp(v, min, max){
 }
 
 /* =========================
-   📰 新聞生成（逆向核心）
+   🧠 生成「不重複事件」
+========================= */
+
+function createEvent(){
+
+  let type = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+
+  let market = markets[Math.floor(Math.random() * markets.length)];
+  let item = items[Math.floor(Math.random() * items.length)];
+
+  let id = `${type}-${market}-${item}-${skyTime.hour}-${skyTime.minute}`;
+
+  // 🔥 去重核心
+  if(eventMemory.has(id)){
+    return null;
+  }
+
+  eventMemory.add(id);
+  updateWorld(type);
+
+  return {
+    id,
+    type,
+    market,
+    item
+  };
+}
+
+/* =========================
+   📰 新聞生成（真正去重）
 ========================= */
 
 function generateArticle(){
 
-  const narrative = chooseNarrative();
+  let event = createEvent();
 
-  applyNarrativeBias(narrative);
+  if(!event) return null;
 
-  const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
+  let time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
 
-  const templates = {
-    stability: [
-      "市場維持穩定運作，跨區流動未見異常。",
-      "物流系統保持一致節奏。",
-      "居民活動維持正常狀態。"
-    ],
-    tension: [
-      "市場出現局部壓力，交易節奏略有不均。",
-      "物流節點出現延遲跡象。",
-      "跨區數據同步出現偏差。"
-    ],
-    growth: [
-      "市場活性提升，交易頻率增加。",
-      "物流效率上升，跨區連結增強。",
-      "資源流動速度加快。"
-    ]
-  };
+  let content = "";
 
-  let body = "";
+  if(event.type === "economy"){
+    content =
+`市場交易出現變動跡象。
+${event.market} 出現 ${event.item} 流動異常。`;
+  }
 
-  for(let i = 0; i < 10; i++){
-    body += templates[narrative][Math.floor(Math.random() * 3)] + "\n";
+  if(event.type === "logistics"){
+    content =
+`跨區運輸節點出現延遲。
+${event.market} 物流效率下降。`;
+  }
+
+  if(event.type === "climate"){
+    content =
+`氣候數據出現微幅波動。
+空島氣流對 ${event.market} 產生影響。`;
+  }
+
+  if(event.type === "population"){
+    content =
+`居民活動密度改變。
+${event.market} 人流出現重新分布。`;
   }
 
   return {
-    title: `【空島觀測報告】第${skyTime.day}天`,
+    title: `【空島觀測】第${skyTime.day}天`,
     content:
-`📍 時間：${time}
+`📍 ${time}
 
-━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━
 
-${body}
+${content}
 
-━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━
 
-📊 世界狀態：
-穩定性：${worldState.stability.toFixed(1)}
-張力：${worldState.tension.toFixed(1)}
-流動性：${worldState.flow.toFixed(1)}
-
-📡 敘事模式：${narrative}
-
-━━━━━━━━━━━━━━━━━━
-
-結論：本日資料由敘事模型重構。`
+📊 世界狀態
+經濟：${worldState.economy.toFixed(1)}
+混亂：${worldState.chaos.toFixed(1)}
+物流：${worldState.logistics.toFixed(1)}
+氣候：${worldState.climate.toFixed(1)}`
   };
 }
 
@@ -197,24 +186,28 @@ function spawnNews(){
 
   tickTime();
 
-  articles.unshift(generateArticle());
+  let article = generateArticle();
 
-  if(articles.length > 40){
-    articles.length = 40;
+  // 🔥 防 null + 防重複
+  if(article){
+    articles.unshift(article);
+  }
+
+  if(articles.length > 60){
+    articles.length = 60;
   }
 
   render();
 }
 
 /* =========================
-   🖥 UI渲染
+   🖥 UI
 ========================= */
 
 function render(){
 
   const list = document.getElementById("newsList");
   const stats = document.getElementById("stats");
-  const breaking = document.getElementById("breaking");
 
   if(!list) return;
 
@@ -238,27 +231,21 @@ function render(){
 `DAY ${skyTime.day}
 ${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
   }
-
-  if(breaking){
-    breaking.style.display = worldState.tension > 10 ? "block" : "none";
-    breaking.innerText = "🚨 SYSTEM PRESSURE DETECTED";
-  }
 }
 
 /* =========================
-   ▶️ INIT（防重複 loop）
+   ▶️ INIT（完全防loop）
 ========================= */
 
 function init(){
 
-  if(window.__skyInit) return; // 🔥 防止重複啟動
-
-  window.__skyInit = true;
+  if(window.__skynews_v3) return;
+  window.__skynews_v3 = true;
 
   articles = [];
   spawnNews();
 
-  setInterval(spawnNews, 6000);
+  setInterval(spawnNews, 5000);
 }
 
 init();
