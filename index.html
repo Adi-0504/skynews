@@ -1,59 +1,36 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>空島電視台 SKY NEWS</title>
 
-  <!-- 💥 正確 CSS 路徑 -->
-  <link rel="stylesheet" href="./css/style.css?v=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ⭐ Noto 字體 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<title>Sky News</title>
 </head>
 
 <body>
 
-  <div class="tv-container">
+<div class="app">
 
-    <!-- 📡 頂部標題 -->
-    <div class="topbar">
-      🗞 空島新聞頻道 SKY NEWS
-    </div>
-
-    <div class="tv-layout-wrapper">
-
-      <div class="tv-layout">
-
-        <!-- 📰 新聞區 -->
-        <div class="news-panel">
-          <div id="breaking"></div>
-          <div id="newsList"></div>
-        </div>
-
-        <!-- 📊 側欄 -->
-        <div class="side-panel">
-          <div id="stats" class="stats-box"></div>
-          <div id="marketBox" class="market-box"></div>
-        </div>
-
-      </div>
-
-    </div>
-
+  <div class="topbar">
+    <div class="title">SKY NEWS｜空島居民日報</div>
+    <div id="time" class="time"></div>
   </div>
 
-  <!-- 🧠 engine -->
-  <script src="./js/engine.js"></script>
+  <div id="content" class="content"></div>
 
-  <!-- 🚀 防止重複啟動 loop（關鍵修復） -->
-  <script>
-    // 🔥 防止 GitHub / reload 重複 setInterval
-    if (!window.__skyLoopStarted) {
-      window.__skyLoopStarted = true;
+  <div class="footer">
+    <button onclick="prev()">上一天</button>
+    <button onclick="next()">下一天</button>
+  </div>
 
-      window.addEventListener("DOMContentLoaded", () => {
-        console.log("🌍 SKY NEWS INIT OK");
-      });
-    }
-  </script>
+</div>
 
+<script src="engine.js"></script>
 </body>
 </html>
