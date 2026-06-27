@@ -3,26 +3,14 @@
 ========================= */
 
 body{
+  margin:0;
   background:#f5f1e6;
   color:#1f2d1f;
   font-family: Arial;
 }
 
-.news-item{
-  background:#fffdf5;
-  border-left:4px solid #2f5d3a;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-}
-
-.news-item.breaking{
-  border-left:4px solid red;
-  background:#fff0f0;
-}
-
 /* =========================
-   📺 外層容器（重點🔥）
+   📺 容器
 ========================= */
 
 .tv-container {
@@ -32,24 +20,24 @@ body{
 }
 
 /* =========================
-   📡 頂部欄
+   📡 頂部
 ========================= */
 
 .topbar {
   padding: 12px;
-  background: #111a2e;
+  background: #1f2d1f;
+  color: #f5f1e6;
   font-weight: bold;
   letter-spacing: 2px;
 }
 
 /* =========================
-   🧱 主區域
+   🧱 layout
 ========================= */
 
 .tv-layout {
   flex: 1;
   display: flex;
-  height: 100%;
 }
 
 /* =========================
@@ -58,9 +46,8 @@ body{
 
 .news-panel {
   flex: 2;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
-  min-height: 0;
 }
 
 /* =========================
@@ -69,21 +56,26 @@ body{
 
 .side-panel {
   flex: 1;
-  padding: 10px;
-  border-left: 1px solid #223;
-  min-height: 0;
+  padding: 12px;
+  border-left: 1px solid #ddd;
 }
 
 /* =========================
-   🧾 新聞卡
+   🧾 新聞卡（重點🔥）
 ========================= */
 
-.news-item {
-  background: #141c2f;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #223;
+.news-item{
+  background:#fffdf5;
+  border-left:4px solid #2f5d3a;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:6px;
+}
+
+/* breaking */
+.news-item.breaking{
+  border-left:4px solid #c0392b;
+  background:#fff0f0;
 }
 
 /* =========================
@@ -93,8 +85,8 @@ body{
 #breaking {
   margin-bottom: 10px;
   padding: 10px;
-  background: #3b0d0d;
-  color: #ffb3b3;
+  background: #c0392b;
+  color: white;
   font-weight: bold;
   display: none;
   border-radius: 6px;
@@ -106,20 +98,20 @@ body{
 
 .stats-box {
   padding: 10px;
-  background: #121a2b;
+  background: #fffdf5;
   margin-bottom: 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 14px;
 }
 
 /* =========================
-   🏪 市集
+   🏪 market
 ========================= */
 
 .market-box {
   padding: 10px;
-  background: #101827;
-  border-radius: 8px;
+  background: #fffdf5;
+  border-radius: 6px;
   white-space: pre-line;
   font-size: 14px;
 }
