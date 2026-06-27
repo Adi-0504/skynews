@@ -17,28 +17,7 @@ let worldState = {
 };
 
 /* =========================
-   🧠 防重複記憶系統
-========================= */
-
-const worldMemory = {
-  lastEvent: null,
-  streak: 0
-};
-
-function isRepeat(type){
-
-  if(worldMemory.lastEvent === type){
-    worldMemory.streak++;
-  } else {
-    worldMemory.lastEvent = type;
-    worldMemory.streak = 0;
-  }
-
-  return worldMemory.streak > 3;
-}
-
-/* =========================
-   ⏱ 時間系統
+   ⏱ 時間系統（已放慢）
 ========================= */
 
 function tickTime(){
@@ -56,26 +35,17 @@ function tickTime(){
 }
 
 /* =========================
-   🌍 世界變動
+   🌍 世界變動（穩定版）
 ========================= */
 
 function updateWorld(){
 
-  worldState.weather += (Math.random() - 0.5) * 2;
-  worldState.economy += (Math.random() - 0.5) * 1.5;
-  worldState.chaos += (Math.random() - 0.5) * 2;
+  worldState.weather += (Math.random() - 0.5) * 1.5;
+  worldState.economy += (Math.random() - 0.5) * 1.2;
+  worldState.chaos += (Math.random() - 0.5) * 1.8;
 
-  // 限制範圍（避免爆）
   worldState.chaos = Math.max(-15, Math.min(15, worldState.chaos));
   worldState.economy = Math.max(0, Math.min(200, worldState.economy));
-}
-
-/* =========================
-   🚨 狀態判定
-========================= */
-
-function isBreaking(){
-  return worldState.chaos > 10;
 }
 
 /* =========================
@@ -87,7 +57,9 @@ const markets = [
   "莫雷鎮集市",
   "卡諾商圈",
   "雷瓦市交易區",
-  "希塔城市場"
+  "希塔城市場",
+  "拉諾居民區市場",
+  "索維交易站"
 ];
 
 const items = [
@@ -95,11 +67,12 @@ const items = [
   "森椒",
   "波光鹽",
   "椰子飲品",
-  "空鷹羽飾"
+  "空鷹羽飾",
+  "礦石粉",
+  "乾果包"
 ];
 
 function marketInfo(){
-
   return {
     name: markets[Math.floor(Math.random() * markets.length)],
     item: items[Math.floor(Math.random() * items.length)],
@@ -108,59 +81,73 @@ function marketInfo(){
 }
 
 /* =========================
-   📰 新聞生成（核心）
+   📰 長新聞生成器（重點🔥）
 ========================= */
 
-function generateArticle(){
+function generateLongArticle(){
 
   const m = marketInfo();
   const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
 
-  // 🚨 災難新聞
-  if(worldState.chaos > 10 && !isRepeat("crisis")){
-    return {
-      type:"crisis",
-      title:"🚨 區域緊急通報",
-      content:
-`多地交通異常
-市場流通受影響
-時間：${time}`
-    };
+  const intro = [
+    "本日空島通訊社持續追蹤各區域市場與物流運作情況。",
+    "根據最新監測資料，多個區域呈現輕微波動。",
+    "跨區觀測系統於清晨更新數據模型，結果顯示整體仍在可控範圍內。",
+    "今日區域新聞整理如下，涵蓋市場、物流與氣候變化。"
+  ];
+
+  const body = [
+    "市場交易維持穩定，但部分物資流通速度略有下降。",
+    "物流節點顯示延遲現象，但尚未影響整體供應。",
+    "居民活動維持正常，未出現大規模異常事件。",
+    "氣候數據顯示雲層與風流穩定，未見極端變化。",
+    "跨區運輸系統仍持續運作，但效率略有波動。"
+  ];
+
+  const analysis = [
+    "分析指出，目前變化屬於正常短期波動。",
+    "專家認為系統仍維持穩定結構，未進入風險區間。",
+    "短期內可能出現微幅調整，但不影響整體運作。",
+    "數據模型顯示市場進入觀察期，需持續追蹤。"
+  ];
+
+  let longBody = "";
+
+  // 🔥 產生長文（穩定重複但不無聊）
+  for(let i = 0; i < 50; i++){
+    longBody += body[Math.floor(Math.random() * body.length)] + "\n";
   }
 
-  // 📉 經濟新聞
-  if(worldState.economy < 70 && !isRepeat("economy")){
-    return {
-      type:"economy",
-      title:"【經濟觀測】市場降溫",
-      content:
-`交易量下降
-供應鏈緊縮
-時間：${time}`
-    };
-  }
-
-  // 🌪 氣候新聞
-  if(worldState.weather > 8 && !isRepeat("weather")){
-    return {
-      type:"weather",
-      title:"【氣候觀測】異常波動",
-      content:
-`氣流變動增加
-雲層厚度上升
-時間：${time}`
-    };
-  }
-
-  // 🌿 一般新聞
   return {
-    type:"normal",
-    title:`【日常觀測】第${skyTime.day}天`,
+    title: `【深度報導】空島第${skyTime.day}天跨區域觀測報告`,
     content:
-`市場：${m.name} (${m.status})
-商品：${m.item}
-時間：${time}`
+`${intro[Math.floor(Math.random() * intro.length)]}
+
+📍 時間：${time}
+🏪 觀測點：${m.name}（${m.status}）
+
+━━━━━━━━━━━━━━━━━━
+
+${longBody}
+
+━━━━━━━━━━━━━━━━━━
+
+📊 專家分析：
+${analysis[Math.floor(Math.random() * analysis.length)]}
+
+結論：整體系統維持穩定，無重大異常風險。
+`
   };
+}
+
+/* =========================
+   📰 新聞生成（唯一入口）
+========================= */
+
+function generateArticle(){
+
+  // 全部統一長文（避免短文混亂）
+  return generateLongArticle();
 }
 
 /* =========================
@@ -172,26 +159,21 @@ function spawnNews(){
   updateWorld();
   tickTime();
 
-  let count = 1;
-
-  // 🔥 不是固定 loop，而是狀態驅動
-  if(worldState.chaos > 10) count = 3;
-  else if(worldState.chaos < -10) count = 2;
+  let count = worldState.chaos > 10 ? 2 : 1;
 
   for(let i = 0; i < count; i++){
     articles.unshift(generateArticle());
   }
 
-  // 防爆
-  if(articles.length > 120){
-    articles.length = 120;
+  if(articles.length > 80){
+    articles.length = 80;
   }
 
   render();
 }
 
 /* =========================
-   🖥 UI Render（穩定版）
+   🖥 UI Render（穩定全螢幕）
 ========================= */
 
 function render(){
@@ -210,7 +192,6 @@ function render(){
     const div = document.createElement("div");
     div.className = "news-item";
 
-    // 🎨 分層 UI
     div.innerHTML = `
       <div class="news-title">${a.title}</div>
       <div class="news-content">${a.content}</div>
@@ -222,10 +203,10 @@ function render(){
   if(stats){
     stats.innerHTML =
 `第 ${skyTime.day} 天
-時間：${skyTime.hour}:${skyTime.minute}
-新聞數：${articles.length}
-chaos：${worldState.chaos.toFixed(1)}
-economy：${worldState.economy.toFixed(1)}`;
+時間 ${skyTime.hour}:${skyTime.minute}
+新聞數 ${articles.length}
+chaos ${worldState.chaos.toFixed(1)}
+economy ${worldState.economy.toFixed(1)}`;
   }
 
   if(marketBox){
@@ -243,7 +224,7 @@ ${m.item}`;
 }
 
 /* =========================
-   ▶️ INIT（不會重複 loop）
+   ▶️ INIT（乾淨啟動）
 ========================= */
 
 function init(){
@@ -252,7 +233,7 @@ function init(){
 
   spawnNews();
 
-  setInterval(spawnNews, 4000);
+  setInterval(spawnNews, 8000); // 🔥 已放慢，不再爆刷
 
 }
 
