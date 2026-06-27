@@ -1,138 +1,202 @@
+/* =========================
+🌍 空島世界資料層
+========================= */
+
+const cities = [
+  "莫雷","比亞","卡諾","索維","雷瓦","奧恩","拉維爾","希諾","維卡","多恩",
+  "米蘭","克羅","塔維","諾亞","薩恩","布拉","維諾","哈爾","奧瑞","利亞",
+  "格恩","索拉","米卡","杜恩","洛維"
+]; // 25城
+
+const villages = [
+  "薩拉村","米諾村","洛森村","卡里村","風葉村","灰岩村","白砂村","雲谷村","木溪村","石原村",
+  "霧川村","青禾村","北嶺村","南霧村","月溪村","星落村","海風村","雨林村","火石村","銀川村",
+  "寒霜村","暖谷村","風港村","鐵木村","石橋村","草原村","雲石村","夜林村","晨曦村","風嵐村",
+  "沙灣村","黑岩村","白霧村","綠田村","藍灣村","赤土村","冷溪村","暖風村","遠山村","霜葉村",
+  "光谷村","影林村","雲岬村","風嶼村","星河村","雷鳴村","靜水村","灰谷村","白川村","風砂村"
+]; // 50+
+
 const world = {
   year: 1353,
   months: [
     "綠芽月","細雨月","花落月","熙陽月","綠葉月",
     "秋楓月","豐饒月","星空月","寒霜月","冰雪月"
-  ],
-  locations: {
-    "薩拉村": ["豆餅攤","水井","補給站","廣場"],
-    "卡諾交易區": ["布料攤","香料攤","木材點","鐵匠鋪"],
-    "雷瓦村": ["魚乾市場","鐵匠鋪","水井","廣場"]
-  }
+  ]
 };
+
+/* =========================
+🧠 系統狀態
+========================= */
 
 const memory = {
   day: 1,
   report: null
 };
 
-const r = arr => arr[Math.floor(Math.random()*arr.length)];
+/* =========================
+🎲 工具
+========================= */
+
+const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 /* =========================
-🧠 時間
+🧭 時間系統
 ========================= */
 
 function getTime(day){
-  const m = Math.floor((day-1)/35);
-  const d = ((day-1)%35)+1;
+  const monthIndex = Math.floor((day-1)/35);
+  const date = ((day-1)%35)+1;
 
-  const year = world.year + Math.floor(m/10);
-  const month = world.months[m%10];
+  const year = world.year + Math.floor(monthIndex/10);
+  const month = world.months[monthIndex % 10];
 
-  return `浮空曆${year}年・${month}・第${d}日`;
+  return `浮空曆${year}年・${month}・第${date}日`;
 }
 
 /* =========================
-🧠 事件
+🌍 地圖選擇（城市 or 村）
+========================= */
+
+function pickLocation(){
+  const isCity = Math.random() < 0.4; // 城市40%，村落60%
+
+  if(isCity){
+    return {
+      type: "city",
+      name: r(cities)
+    };
+  }else{
+    return {
+      type: "village",
+      name: r(villages)
+    };
+  }
+}
+
+/* =========================
+⚡ 事件類型
+========================= */
+
+function eventType(){
+
+  const pool = [
+    "market","market","market","market",
+    "logistics","logistics","logistics",
+    "population","population",
+    "incident",
+    "rumor",
+    "weather"
+  ];
+
+  return r(pool);
+}
+
+/* =========================
+🧠 單一事件
 ========================= */
 
 function event(){
+
+  const loc = pickLocation();
+
   return {
-    region: r(Object.keys(world.locations)),
-    spot: r(r(world.locations)),
-    type: r(["market","logistics","move"])
+    location: loc.name,
+    scope: loc.type,
+    type: eventType()
   };
 }
 
 /* =========================
-🧠 長篇新聞生成（核心）
+📰 事件轉文字（穩定輸出）
 ========================= */
 
-function writeArticle(group, index){
+function narrate(e){
 
-  const main = group[0];
-  const region = main.region;
+  if(!e) return "觀測資料不足，無法生成內容。";
 
-  let title = "";
+  const place = e.location;
 
-  if(main.type === "market")
-    title = "交易流動與人流變化觀測";
+  switch(e.type){
 
-  if(main.type === "logistics")
-    title = "物流節點運作狀態追蹤";
+    case "market":
+      return `${place}市場活動明顯上升，人流集中於主要交易點，部分攤位出現排隊現象，交易節奏加快。`;
 
-  if(main.type === "move")
-    title = "人口流動與聚落動態報導";
+    case "logistics":
+      return `${place}補給路線出現延遲，物資流動速度下降，部分貨物流向鄰近節點調整。`;
 
-  let intro = `
-第${index+1}則報導｜${region}觀測紀錄
+    case "population":
+      return `${place}人口流動出現集中趨勢，短時間內形成明顯聚集熱點。`;
 
-浮空曆時間：${getTime(memory.day)}
+    case "incident":
+      return `${place}出現異常事件紀錄，局部系統監測到不穩定波動，但未擴散。`;
 
-本報導由空島跨區觀測系統整理，針對${region}當日局部活動進行追蹤分析。
-`;
+    case "rumor":
+      return `${place}出現資訊流動異常，當地居民對未確認消息產生討論與關注。`;
 
-  let body = "";
+    case "weather":
+      return `${place}氣候條件出現變化，風流與雲層密度短期波動明顯。`;
 
-  for(const e of group){
-
-    if(e.type === "market"){
-      body += `${e.region}${e.spot}一帶出現明顯人流增加現象，部分攤位開始出現排隊情況，交易節奏較平日加快，顯示短時間內需求集中。\n\n`;
-    }
-
-    if(e.type === "logistics"){
-      body += `${e.region}${e.spot}補給節點出現延遲情況，物資流動速度下降，部分居民選擇轉向鄰近節點進行補給，形成間接壓力轉移。\n\n`;
-    }
-
-    if(e.type === "move"){
-      body += `${e.region}${e.spot}周邊出現人口流動集中現象，人群停留時間增加，使得局部區域活動密度提升，形成短期聚集點。\n\n`;
-    }
+    default:
+      return `${place}出現一般性活動變化。`;
   }
-
-  let conclusion = `
-整體觀察顯示，${region}雖然出現多點波動，但仍屬局部性調整，未觀測到跨區連鎖影響。系統判定目前狀態維持穩定。
-`;
-
-  return `
-<div class="headline">${title}</div>
-<p>${intro}</p>
-<p>${body}</p>
-<p>${conclusion}</p>
-`;
 }
 
 /* =========================
-📰 一天新聞（10篇長文）
+📦 生成當日事件
+========================= */
+
+function generateEvents(){
+
+  const events = [];
+
+  for(let i=0;i<140;i++){
+    events.push(event());
+  }
+
+  return events;
+}
+
+/* =========================
+📰 生成長篇新聞（10篇）
 ========================= */
 
 function generateReport(day){
 
-  let events = [];
-
-  for(let i=0;i<50;i++){
-    events.push(event());
-  }
-
-  /* 切成10組 */
-  const groups = [];
-
-  for(let i=0;i<10;i++){
-    groups.push(events.slice(i*5, i*5+5));
-  }
+  const events = generateEvents();
 
   let html = `
 <div class="headline">空島跨區域深度觀測日報</div>
 <p>${getTime(day)}</p>
-<p>本日監測資料已整理為10篇區域報導如下：</p>
+<p>本日監測資料整理為10篇區域報導如下：</p>
 `;
 
-  groups.forEach((g,i)=>{
-    html += writeArticle(g,i);
-  });
+  const chunkSize = Math.floor(events.length / 10);
+
+  for(let i=0;i<10;i++){
+
+    const chunk = events.slice(i*chunkSize, (i+1)*chunkSize);
+
+    html += `
+<div class="article">
+<div class="title">第${i+1}則｜區域觀測報導</div>
+<p>
+`;
+
+    for(const e of chunk){
+      html += narrate(e) + "<br><br>";
+    }
+
+    html += `
+</p>
+</div>
+`;
+  }
 
   html += `
-<div class="headline">總體觀察</div>
-<p>今日空島整體結構穩定，雖然多區域出現人流與物流波動，但均屬短期現象。未觀測到跨區域連鎖反應，系統維持正常運作。</p>
+<div class="headline">總體觀測</div>
+<p>
+今日空島整體維持穩定結構。城市層面呈現交易活躍與物流調整並行的狀態，而村落則以人口流動與補給變化為主。雖然局部區域出現短期波動，但未觀測到跨區連鎖效應，系統仍處於安全範圍內。
+</p>
 `;
 
   return html;
@@ -154,13 +218,13 @@ function render(){
 }
 
 /* =========================
-🎯 init（一天一報）
+🎯 初始化
 ========================= */
 
 function init(){
 
   document.getElementById("prevBtn").addEventListener("click", ()=>{
-    if(memory.day>1){
+    if(memory.day > 1){
       memory.day--;
       memory.report = null;
       render();
