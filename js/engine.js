@@ -1,7 +1,3 @@
-/* =========================
-   🌍 空島世界狀態
-========================= */
-
 let articles = [];
 
 let skyTime = {
@@ -16,19 +12,12 @@ let worldState = {
   weather: 0
 };
 
-/* =========================
-   🧪 DEBUG
-========================= */
-
 function debug(msg){
   const el = document.getElementById("debugBox");
   if(el) el.innerText = msg;
 }
 
-/* =========================
-   ⏱ 時間系統（20h / 65min）
-========================= */
-
+/* ⏱ 時間 */
 function tickTime(){
   skyTime.minute++;
 
@@ -43,92 +32,87 @@ function tickTime(){
   }
 }
 
-/* =========================
-   🌍 世界變動
-========================= */
-
+/* 🌍 世界 */
 function updateWorld(){
-  worldState.weather += (Math.random() - 0.5) * 2;
-  worldState.economy += (Math.random() - 0.5) * 1.5;
-  worldState.chaos += (Math.random() - 0.5) * 2;
+  worldState.weather += (Math.random()-0.5)*2;
+  worldState.economy += (Math.random()-0.5)*1.5;
+  worldState.chaos += (Math.random()-0.5)*2;
 }
-
-/* =========================
-   🚨 BREAKING
-========================= */
 
 function isBreaking(){
   return Math.abs(worldState.chaos) > 7;
 }
 
-/* =========================
-   🏪 市集（穩定版本）
-========================= */
-
+/* 🏪 市集 */
 const markets = ["金穗市集", "雲橋市集", "礦心交易所", "潮聲市集"];
 const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
 
 function marketInfo(){
   return {
-    name: markets[Math.floor(Math.random() * markets.length)],
-    item: items[Math.floor(Math.random() * items.length)],
+    name: markets[Math.floor(Math.random()*markets.length)],
+    item: items[Math.floor(Math.random()*items.length)],
     status: skyTime.hour >= 6 && skyTime.hour <= 18 ? "營業中" : "休市"
   };
 }
 
-/* =========================
-   📰 新聞生成（優化版）
-========================= */
-
+/* 📰 新聞 */
 function generateArticle(){
 
   const m = marketInfo();
-
   const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
 
-  if(isBreaking()){
+  let type = isBreaking() ? "breaking"
+            : Math.random() < 0.4 ? "weather"
+            : Math.random() < 0.7 ? "economy"
+            : "transport";
+
+  if(type === "weather"){
     return {
-      title: "🚨 BREAKING：空島氣流異常",
-      content: `氣流波動監測中，空鷹航線調整\n時間：${time}`
+      type,
+      title: "【氣候專題】森林島雲層觀測",
+      content: "雲層穩定，無異常氣候變化。"
+    };
+  }
+
+  if(type === "economy"){
+    return {
+      type,
+      title: "【經濟觀測】mato damu流通",
+      content: "市場交易穩定，無大幅波動。"
+    };
+  }
+
+  if(type === "transport"){
+    return {
+      type,
+      title: "【空鷹航運】路線觀測",
+      content: "航線略有延遲，但整體正常。"
     };
   }
 
   return {
-    title: `【空島日報】第${skyTime.day}天`,
-    content:
-`時間：${time}
-市場：${m.name} (${m.status})
-商品：${m.item}`
+    type: "breaking",
+    title: "🚨 BREAKING：氣流異常",
+    content: "空鷹航線調整中，持續監測。"
   };
 }
 
-/* =========================
-   🚀 主循環
-========================= */
-
+/* 🚀 主循環 */
 function spawnNews(){
 
   updateWorld();
   tickTime();
 
-  const count = isBreaking() ? 3 : 1;
+  articles.unshift(generateArticle());
 
-  for(let i = 0; i < count; i++){
-    articles.unshift(generateArticle());
-  }
-
-  // 防爆（只保留最新 100）
-  if(articles.length > 100){
-    articles = articles.slice(0, 100);
+  if(articles.length > 200){
+    articles = articles.slice(0, 200);
   }
 
   render();
 }
 
-/* =========================
-   🖥 RENDER（電視台版）
-========================= */
-
+/* 🖥 UI */
 function render(){
 
   const list = document.getElementById("newsList");
@@ -140,26 +124,25 @@ function render(){
 
   list.innerHTML = "";
 
-  articles.forEach(a => {
+  articles.slice(0, 30).forEach(a => {
 
     const div = document.createElement("div");
     div.className = "news-item";
 
-    div.innerHTML = `
-      <div class="news-title">${a.title}</div>
-      <div class="news-content">${a.content}</div>
-    `;
+    if(a.type === "breaking"){
+      div.classList.add("breaking");
+    }
 
+    div.innerHTML = `<b>${a.title}</b><br>${a.content}`;
     list.appendChild(div);
   });
 
   if(stats){
-    stats.innerHTML = `
-      🕒 第 ${skyTime.day} 天<br>
-      ⏰ ${skyTime.hour}:${skyTime.minute}<br>
-      📰 ${articles.length}<br>
-      🌪 chaos ${worldState.chaos.toFixed(1)}
-    `;
+    stats.innerHTML =
+`第 ${skyTime.day} 天
+${skyTime.hour}:${skyTime.minute}
+新聞數：${articles.length}
+chaos ${worldState.chaos.toFixed(1)}`;
   }
 
   if(marketBox){
@@ -172,23 +155,13 @@ ${m.item}`;
 
   if(breaking){
     breaking.style.display = isBreaking() ? "block" : "none";
-    breaking.innerText = "🚨 BREAKING LIVE";
   }
 }
 
-/* =========================
-   ▶️ INIT
-========================= */
-
 function init(){
-
   articles = [];
-
   spawnNews();
-
   setInterval(spawnNews, 4000);
-
-  debug("engine ready");
 }
 
 init();
