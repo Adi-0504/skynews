@@ -4,37 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>空島電視台 SKY NEWS</title>
-  <link rel="stylesheet" href="./css/style.css">
+
+  <!-- 💥 正確 CSS 路徑 -->
+  <link rel="stylesheet" href="./css/style.css?v=1">
 </head>
 
 <body>
 
-<div class="tv-container">
+  <div class="tv-container">
 
-  <!-- 📡 頂部 -->
-  <div class="topbar">
-    🗞 空島新聞頻道 SKY NEWS
-  </div>
+    <!-- 📡 頂部標題 -->
+    <div class="topbar">
+      🗞 空島新聞頻道 SKY NEWS
+    </div>
 
-  <div class="tv-layout-wrapper">
+    <div class="tv-layout-wrapper">
 
-    <div class="tv-layout">
+      <div class="tv-layout">
 
-      <!-- 📰 新聞流 -->
-      <div class="news-panel">
+        <!-- 📰 新聞區 -->
+        <div class="news-panel">
+          <div id="breaking"></div>
+          <div id="newsList"></div>
+        </div>
 
-        <div id="breaking"></div>
-
-        <div id="newsList"></div>
-
-      </div>
-
-      <!-- 📊 側欄 -->
-      <div class="side-panel">
-
-        <div id="stats" class="stats-box"></div>
-
-        <div id="marketBox" class="market-box"></div>
+        <!-- 📊 側欄 -->
+        <div class="side-panel">
+          <div id="stats" class="stats-box"></div>
+          <div id="marketBox" class="market-box"></div>
+        </div>
 
       </div>
 
@@ -42,10 +40,20 @@
 
   </div>
 
-</div>
+  <!-- 🧠 engine -->
+  <script src="./js/engine.js"></script>
 
-<!-- 💥 重點修正：JS 路徑 -->
-<script src="./js/engine.js"></script>
+  <!-- 🚀 防止重複啟動 loop（關鍵修復） -->
+  <script>
+    // 🔥 防止 GitHub / reload 重複 setInterval
+    if (!window.__skyLoopStarted) {
+      window.__skyLoopStarted = true;
+
+      window.addEventListener("DOMContentLoaded", () => {
+        console.log("🌍 SKY NEWS INIT OK");
+      });
+    }
+  </script>
 
 </body>
 </html>
