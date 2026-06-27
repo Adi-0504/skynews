@@ -3,6 +3,7 @@
 ========================= */
 
 let articles = [];
+let history = []; // 🔥 新增：歷史記憶
 
 let skyTime = {
   day: 1,
@@ -17,7 +18,7 @@ let worldState = {
 };
 
 /* =========================
-   ⏱ 時間系統（已放慢）
+   ⏱ 時間
 ========================= */
 
 function tickTime(){
@@ -30,22 +31,59 @@ function tickTime(){
 
   if(skyTime.hour >= 20){
     skyTime.hour = 0;
+    saveHistory(); // 🔥 每天記錄
     skyTime.day++;
   }
 }
 
 /* =========================
-   🌍 世界變動（穩定版）
+   📦 歷史記憶系統
+========================= */
+
+function saveHistory(){
+
+  history.push({
+    day: skyTime.day,
+    chaos: worldState.chaos,
+    economy: worldState.economy,
+    weather: worldState.weather
+  });
+
+  // 只保留最近30天
+  if(history.length > 30){
+    history.shift();
+  }
+}
+
+function getTrend(){
+
+  if(history.length < 2){
+    return "初始觀測期";
+  }
+
+  const last = history[history.length - 1];
+  const prev = history[history.length - 2];
+
+  const diff = last.chaos - prev.chaos;
+
+  if(diff > 2) return "不穩定上升";
+  if(diff < -2) return "趨於穩定";
+  return "小幅波動";
+}
+
+/* =========================
+   🌍 世界變動（帶記憶影響）
 ========================= */
 
 function updateWorld(){
 
-  worldState.weather += (Math.random() - 0.5) * 1.5;
-  worldState.economy += (Math.random() - 0.5) * 1.2;
-  worldState.chaos += (Math.random() - 0.5) * 1.8;
+  let memoryFactor = history.length * 0.02;
 
-  worldState.chaos = Math.max(-15, Math.min(15, worldState.chaos));
-  worldState.economy = Math.max(0, Math.min(200, worldState.economy));
+  worldState.weather += (Math.random() - 0.5) * (1 + memoryFactor);
+  worldState.economy += (Math.random() - 0.5) * (1 + memoryFactor);
+  worldState.chaos += (Math.random() - 0.5) * (1.5 + memoryFactor);
+
+  worldState.chaos = Math.max(-20, Math.min(20, worldState.chaos));
 }
 
 /* =========================
@@ -53,24 +91,16 @@ function updateWorld(){
 ========================= */
 
 const markets = [
-  "薩拉村市場",
-  "莫雷鎮集市",
-  "卡諾商圈",
-  "雷瓦市交易區",
-  "希塔城市場",
-  "拉諾居民區市場",
+  "薩拉村聚落",
+  "莫雷村集市",
+  "卡諾聚落交易區",
+  "雷瓦村市場",
+  "希塔聚落中心",
+  "拉諾村集市",
   "索維交易站"
 ];
 
-const items = [
-  "雲莓",
-  "森椒",
-  "波光鹽",
-  "椰子飲品",
-  "空鷹羽飾",
-  "礦石粉",
-  "乾果包"
-];
+const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
 
 function marketInfo(){
   return {
@@ -81,50 +111,49 @@ function marketInfo(){
 }
 
 /* =========================
-   📰 長新聞生成器（重點🔥）
+   📰 長新聞（會引用歷史）
 ========================= */
 
-function generateLongArticle(){
+function generateArticle(){
 
   const m = marketInfo();
-  const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
+  const trend = getTrend();
 
   const intro = [
-    "本日空島通訊社持續追蹤各區域市場與物流運作情況。",
-    "根據最新監測資料，多個區域呈現輕微波動。",
-    "跨區觀測系統於清晨更新數據模型，結果顯示整體仍在可控範圍內。",
-    "今日區域新聞整理如下，涵蓋市場、物流與氣候變化。"
+    "空島通訊社持續追蹤跨區域變動。",
+    "根據歷史資料比對，本日數據呈現延續性變化。",
+    "監測中心更新歷史模型後，顯示系統仍具穩定性。",
+    "今日觀測結合過去30日資料進行分析。"
   ];
 
   const body = [
-    "市場交易維持穩定，但部分物資流通速度略有下降。",
-    "物流節點顯示延遲現象，但尚未影響整體供應。",
-    "居民活動維持正常，未出現大規模異常事件。",
-    "氣候數據顯示雲層與風流穩定，未見極端變化。",
-    "跨區運輸系統仍持續運作，但效率略有波動。"
+    `與昨日相比，系統呈現${trend}特徵。`,
+    "市場流動性維持正常區間，但存在細微變化。",
+    "物流節點延遲情況與歷史波動高度相關。",
+    "氣候變化與前期數據呈現一致趨勢。",
+    "經濟指標與過去三日平均值接近。"
   ];
 
   const analysis = [
-    "分析指出，目前變化屬於正常短期波動。",
-    "專家認為系統仍維持穩定結構，未進入風險區間。",
-    "短期內可能出現微幅調整，但不影響整體運作。",
-    "數據模型顯示市場進入觀察期，需持續追蹤。"
+    "歷史模型顯示目前屬於正常循環波動。",
+    "長期數據未顯示系統崩壞風險。",
+    "短期變化與過去事件高度相關。",
+    "整體趨勢仍維持可控範圍。"
   ];
 
   let longBody = "";
 
-  // 🔥 產生長文（穩定重複但不無聊）
-  for(let i = 0; i < 50; i++){
+  for(let i = 0; i < 40; i++){
     longBody += body[Math.floor(Math.random() * body.length)] + "\n";
   }
 
   return {
-    title: `【深度報導】空島第${skyTime.day}天跨區域觀測報告`,
+    title: `【歷史專題】空島第${skyTime.day}天跨期觀測報告`,
     content:
 `${intro[Math.floor(Math.random() * intro.length)]}
 
-📍 時間：${time}
-🏪 觀測點：${m.name}（${m.status}）
+📍 市場觀測：${m.name}（${m.status}）
+📊 歷史趨勢：${trend}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -132,26 +161,16 @@ ${longBody}
 
 ━━━━━━━━━━━━━━━━━━
 
-📊 專家分析：
+📈 分析：
 ${analysis[Math.floor(Math.random() * analysis.length)]}
 
-結論：整體系統維持穩定，無重大異常風險。
+結論：系統行為已納入歷史模型評估，目前維持穩定。
 `
   };
 }
 
 /* =========================
-   📰 新聞生成（唯一入口）
-========================= */
-
-function generateArticle(){
-
-  // 全部統一長文（避免短文混亂）
-  return generateLongArticle();
-}
-
-/* =========================
-   🚀 主循環（已修 loop）
+   🚀 主循環
 ========================= */
 
 function spawnNews(){
@@ -159,21 +178,21 @@ function spawnNews(){
   updateWorld();
   tickTime();
 
-  let count = worldState.chaos > 10 ? 2 : 1;
+  let count = worldState.chaos > 12 ? 2 : 1;
 
   for(let i = 0; i < count; i++){
     articles.unshift(generateArticle());
   }
 
-  if(articles.length > 80){
-    articles.length = 80;
+  if(articles.length > 60){
+    articles.length = 60;
   }
 
   render();
 }
 
 /* =========================
-   🖥 UI Render（穩定全螢幕）
+   🖥 UI
 ========================= */
 
 function render(){
@@ -204,9 +223,9 @@ function render(){
     stats.innerHTML =
 `第 ${skyTime.day} 天
 時間 ${skyTime.hour}:${skyTime.minute}
-新聞數 ${articles.length}
+新聞 ${articles.length}
 chaos ${worldState.chaos.toFixed(1)}
-economy ${worldState.economy.toFixed(1)}`;
+trend ${getTrend()}`;
   }
 
   if(marketBox){
@@ -218,23 +237,19 @@ ${m.item}`;
   }
 
   if(breaking){
-    breaking.style.display = worldState.chaos > 10 ? "block" : "none";
-    breaking.innerText = "🚨 BREAKING LIVE";
+    breaking.style.display = worldState.chaos > 12 ? "block" : "none";
+    breaking.innerText = "🚨 BREAKING HISTORY EVENT";
   }
 }
 
 /* =========================
-   ▶️ INIT（乾淨啟動）
+   ▶️ INIT
 ========================= */
 
 function init(){
-
   articles = [];
-
   spawnNews();
-
-  setInterval(spawnNews, 8000); // 🔥 已放慢，不再爆刷
-
+  setInterval(spawnNews, 8000);
 }
 
 init();
