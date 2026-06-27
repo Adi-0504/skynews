@@ -1,105 +1,149 @@
+/* =========================
+🌍 SKY NEWS v2 DESIGN
+米白 × 深葉綠報紙系統
+========================= */
+
 body{
   margin:0;
   font-family:"Noto Sans TC", sans-serif;
-  background:#f3efe6;
+  background:#F6F3EC;
   color:#1e1e1e;
 }
+
+/* =========================
+layout
+========================= */
 
 .layout{
   display:flex;
   height:100vh;
 }
 
-/* sidebar */
+/* =========================
+sidebar
+========================= */
+
 .sidebar{
-  width:220px;
-  background:#1f3b2c;
-  color:#f3efe6;
-  padding:20px;
+  width:240px;
+  background:#2F4F3E;
+  color:#F6F3EC;
+  padding:22px;
+  position:relative;
 }
 
 .logo{
-  font-size:18px;
-  font-weight:900;
-  margin-bottom:20px;
-  letter-spacing:2px;
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:3px;
+  margin-bottom:24px;
 }
 
 .nav div{
   padding:10px 0;
+  font-weight:500;
   opacity:0.85;
   cursor:pointer;
+  transition:0.2s;
 }
 
 .nav div:hover{
   opacity:1;
+  transform:translateX(4px);
 }
 
 .small{
   position:absolute;
   bottom:20px;
   font-size:12px;
-  opacity:0.5;
+  opacity:0.6;
 }
 
-/* main */
+/* =========================
+main
+========================= */
+
 .main{
   flex:1;
   display:flex;
   flex-direction:column;
+  background:#F6F3EC;
 }
 
+/* topbar */
 .topbar{
   display:flex;
   justify-content:space-between;
-  padding:18px 24px;
-  border-bottom:2px solid #1f3b2c;
+  padding:18px 28px;
+  border-bottom:1px solid #D8D3C8;
+  background:#F6F3EC;
 }
 
 .title{
-  font-weight:900;
-  color:#1f3b2c;
+  font-weight:800;
+  color:#2F4F3E;
+  font-size:18px;
+  letter-spacing:1px;
 }
 
 .time{
-  color:#2f5a43;
-  opacity:0.8;
+  color:#5B725F;
+  font-weight:500;
 }
 
-/* content */
+/* =========================
+content（專題報導區）
+========================= */
+
 .content{
   flex:1;
   overflow:auto;
-  padding:40px;
+  padding:50px 40px;
   max-width:900px;
   margin:auto;
 }
 
+/* 頭條 */
 .headline{
   font-size:34px;
-  font-weight:900;
-  color:#1f3b2c;
+  font-weight:800;
+  color:#2F4F3E;
   margin-bottom:20px;
+  line-height:1.4;
 }
 
+/* 文章段落 */
 .content p{
   font-size:18px;
-  line-height:2.2;
+  line-height:2.1;
+  font-weight:400;
+  color:#1e1e1e;
 }
 
-/* footer */
+/* =========================
+footer
+========================= */
+
 .footer{
   display:flex;
   justify-content:space-between;
-  padding:14px 24px;
-  border-top:2px solid #1f3b2c;
+  padding:16px 28px;
+  border-top:1px solid #D8D3C8;
+  background:#F6F3EC;
 }
 
+/* buttons */
 button{
-  background:#1f3b2c;
-  color:#f3efe6;
+  background:#2F4F3E;
+  color:#F6F3EC;
   border:none;
-  padding:10px 16px;
-  border-radius:10px;
+  padding:10px 18px;
+  border-radius:12px;
   cursor:pointer;
+  font-weight:600;
+  transition:0.2s;
+}
+
+button:hover{
+  background:#3A5F4A;
+  transform:translateY(-1px);
 }
