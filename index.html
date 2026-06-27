@@ -5,10 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 🌍 Noto 字體 -->
+  <!-- Noto -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 
-  <!-- 🎨 CSS（注意路徑） -->
+  <!-- CSS -->
   <link rel="stylesheet" href="./css/style.css">
 
   <title>Sky News｜空島新聞</title>
@@ -18,9 +18,7 @@
 
 <div class="layout">
 
-  <!-- 🧭 左側導航 -->
   <aside class="sidebar">
-
     <div class="logo">SKY NEWS</div>
 
     <div class="nav">
@@ -30,35 +28,27 @@
       <div>聚落動態</div>
     </div>
 
-    <div class="small">
-      浮空曆 1353 年
-    </div>
-
+    <div class="small">浮空曆 1353 年</div>
   </aside>
 
-  <!-- 📰 主內容 -->
   <main class="main">
 
-    <!-- 上方列 -->
     <header class="topbar">
       <div class="title">空島居民日報</div>
       <div id="time" class="time"></div>
     </header>
 
-    <!-- 新聞內容 -->
     <article id="content" class="content"></article>
 
-    <!-- 翻頁 -->
     <footer class="footer">
-      <button onclick="prev()">上一天</button>
-      <button onclick="next()">下一天</button>
+      <button id="prevBtn">上一天</button>
+      <button id="nextBtn">下一天</button>
     </footer>
 
   </main>
 
 </div>
 
-<!-- 🚀 JS（注意路徑） -->
 <script src="./js/engine.js"></script>
 
 </body>
