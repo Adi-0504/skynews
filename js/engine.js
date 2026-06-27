@@ -3,7 +3,7 @@
 ========================= */
 
 let articles = [];
-let history = []; // 🔥 新增：歷史記憶
+let history = [];
 
 let skyTime = {
   day: 1,
@@ -18,7 +18,7 @@ let worldState = {
 };
 
 /* =========================
-   ⏱ 時間
+   ⏱ 時間系統
 ========================= */
 
 function tickTime(){
@@ -31,13 +31,13 @@ function tickTime(){
 
   if(skyTime.hour >= 20){
     skyTime.hour = 0;
-    saveHistory(); // 🔥 每天記錄
+    saveHistory();
     skyTime.day++;
   }
 }
 
 /* =========================
-   📦 歷史記憶系統
+   📦 歷史記錄
 ========================= */
 
 function saveHistory(){
@@ -49,41 +49,105 @@ function saveHistory(){
     weather: worldState.weather
   });
 
-  // 只保留最近30天
   if(history.length > 30){
     history.shift();
   }
 }
 
-function getTrend(){
+/* =========================
+   🌍 世界影響判斷
+========================= */
 
-  if(history.length < 2){
-    return "初始觀測期";
+function detectWorldEvents(){
+
+  let events = [];
+
+  if(worldState.weather > 6){
+    events.push("weatherHigh");
   }
 
-  const last = history[history.length - 1];
-  const prev = history[history.length - 2];
+  if(worldState.chaos > 8){
+    events.push("logisticsDelay");
+  }
 
-  const diff = last.chaos - prev.chaos;
+  if(worldState.economy < 80){
+    events.push("marketDrop");
+  }
 
-  if(diff > 2) return "不穩定上升";
-  if(diff < -2) return "趨於穩定";
-  return "小幅波動";
+  return events;
 }
 
 /* =========================
-   🌍 世界變動（帶記憶影響）
+   ⚙️ 影響規則（因果核心）
+========================= */
+
+const impactRules = [
+  {
+    if: "weatherHigh",
+    effect: () => {
+      worldState.chaos += 1;
+      return "強風干擾空鷹航線";
+    }
+  },
+  {
+    if: "logisticsDelay",
+    effect: () => {
+      worldState.economy -= 1.2;
+      return "物流延遲影響市場流動";
+    }
+  },
+  {
+    if: "marketDrop",
+    effect: () => {
+      worldState.chaos += 0.6;
+      return "市場波動引發短期不穩";
+    }
+  }
+];
+
+/* =========================
+   🔁 套用影響
+========================= */
+
+function applyImpacts(){
+
+  const events = detectWorldEvents();
+  let results = [];
+
+  events.forEach(e => {
+
+    const rule = impactRules.find(r => r.if === e);
+
+    if(rule){
+      results.push(rule.effect());
+    }
+
+  });
+
+  return results;
+}
+
+/* =========================
+   🌍 世界更新（因果版）
 ========================= */
 
 function updateWorld(){
 
-  let memoryFactor = history.length * 0.02;
+  worldState.weather += (Math.random() - 0.5) * 1.2;
+  worldState.economy += (Math.random() - 0.5) * 1.0;
+  worldState.chaos += (Math.random() - 0.5) * 1.5;
 
-  worldState.weather += (Math.random() - 0.5) * (1 + memoryFactor);
-  worldState.economy += (Math.random() - 0.5) * (1 + memoryFactor);
-  worldState.chaos += (Math.random() - 0.5) * (1.5 + memoryFactor);
+  // 🔥 連鎖反應
+  if(worldState.weather > 7){
+    worldState.economy -= 0.2;
+  }
+
+  if(worldState.chaos > 10){
+    worldState.weather += 0.3;
+  }
 
   worldState.chaos = Math.max(-20, Math.min(20, worldState.chaos));
+  worldState.economy = Math.max(50, Math.min(150, worldState.economy));
 }
 
 /* =========================
@@ -100,7 +164,14 @@ const markets = [
   "索維交易站"
 ];
 
-const items = ["雲莓", "森椒", "波光鹽", "椰子飲品", "空鷹羽飾"];
+const items = [
+  "雲莓",
+  "森椒",
+  "波光鹽",
+  "椰子飲品",
+  "空鷹羽飾",
+  "礦石粉"
+];
 
 function marketInfo(){
   return {
@@ -111,61 +182,64 @@ function marketInfo(){
 }
 
 /* =========================
-   📰 長新聞（會引用歷史）
+   📰 新聞生成（核心）
 ========================= */
 
 function generateArticle(){
 
   const m = marketInfo();
-  const trend = getTrend();
+  const impacts = applyImpacts();
 
-  const intro = [
-    "空島通訊社持續追蹤跨區域變動。",
-    "根據歷史資料比對，本日數據呈現延續性變化。",
-    "監測中心更新歷史模型後，顯示系統仍具穩定性。",
-    "今日觀測結合過去30日資料進行分析。"
+  const time = `${skyTime.hour.toString().padStart(2,'0')}:${skyTime.minute.toString().padStart(2,'0')}`;
+
+  const intro = "空島通訊社持續進行跨區域監測，本日資料整理如下。";
+
+  let impactText = "";
+
+  if(impacts.length === 0){
+    impactText = "系統未出現明顯連鎖異常反應。";
+  } else {
+    impactText = impacts.map(i => `• ${i}`).join("\n");
+  }
+
+  let body = "";
+
+  const baseLines = [
+    "市場交易維持基本穩定，但流動速度略有變化。",
+    "物流節點顯示輕微延遲，但仍維持運作。",
+    "居民活動正常，未出現大規模異常事件。",
+    "氣候數據保持穩定，無極端變化。",
+    "跨區運輸系統仍持續運作。"
   ];
 
-  const body = [
-    `與昨日相比，系統呈現${trend}特徵。`,
-    "市場流動性維持正常區間，但存在細微變化。",
-    "物流節點延遲情況與歷史波動高度相關。",
-    "氣候變化與前期數據呈現一致趨勢。",
-    "經濟指標與過去三日平均值接近。"
-  ];
-
-  const analysis = [
-    "歷史模型顯示目前屬於正常循環波動。",
-    "長期數據未顯示系統崩壞風險。",
-    "短期變化與過去事件高度相關。",
-    "整體趨勢仍維持可控範圍。"
-  ];
-
-  let longBody = "";
-
-  for(let i = 0; i < 40; i++){
-    longBody += body[Math.floor(Math.random() * body.length)] + "\n";
+  for(let i = 0; i < 35; i++){
+    body += baseLines[Math.floor(Math.random() * baseLines.length)] + "\n";
   }
 
   return {
-    title: `【歷史專題】空島第${skyTime.day}天跨期觀測報告`,
+    title: `【空島深度報導】第${skyTime.day}天系統觀測`,
     content:
-`${intro[Math.floor(Math.random() * intro.length)]}
+`${intro}
 
-📍 市場觀測：${m.name}（${m.status}）
-📊 歷史趨勢：${trend}
-
-━━━━━━━━━━━━━━━━━━
-
-${longBody}
+📍 時間：${time}
+🏪 市場：${m.name}（${m.status}）
 
 ━━━━━━━━━━━━━━━━━━
 
-📈 分析：
-${analysis[Math.floor(Math.random() * analysis.length)]}
+🧭 事件分析：
+${impactText}
 
-結論：系統行為已納入歷史模型評估，目前維持穩定。
-`
+━━━━━━━━━━━━━━━━━━
+
+${body}
+
+━━━━━━━━━━━━━━━━━━
+
+📊 專家結論：
+本日系統已納入因果模型分析。
+目前仍維持穩定，但存在輕微波動連鎖可能。
+
+結論：整體可控。`
   };
 }
 
@@ -223,9 +297,9 @@ function render(){
     stats.innerHTML =
 `第 ${skyTime.day} 天
 時間 ${skyTime.hour}:${skyTime.minute}
-新聞 ${articles.length}
+新聞數 ${articles.length}
 chaos ${worldState.chaos.toFixed(1)}
-trend ${getTrend()}`;
+economy ${worldState.economy.toFixed(1)}`;
   }
 
   if(marketBox){
@@ -238,7 +312,7 @@ ${m.item}`;
 
   if(breaking){
     breaking.style.display = worldState.chaos > 12 ? "block" : "none";
-    breaking.innerText = "🚨 BREAKING HISTORY EVENT";
+    breaking.innerText = "🚨 BREAKING SYSTEM EVENT";
   }
 }
 
