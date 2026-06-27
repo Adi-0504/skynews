@@ -7,58 +7,65 @@ html, body {
   overflow: hidden;
 }
 
-/* 外層 */
+/* 主容器 */
 .tv-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* 頂部 */
+/* 頂部欄 */
 .topbar {
-  padding: 12px;
+  height: 50px;
   background: #1f3b2c;
   color: #f4f1e6;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
   font-weight: bold;
   letter-spacing: 2px;
+  position: relative;
 }
 
-/* 主區 */
+/* 右上角時間 */
+#stats {
+  position: absolute;
+  right: 16px;
+  top: 6px;
+  font-size: 12px;
+  text-align: right;
+  color: #f4f1e6;
+  line-height: 1.2;
+}
+
+/* 主內容 */
 .tv-layout-wrapper {
   flex: 1;
   display: flex;
   overflow: hidden;
 }
 
-/* 新聞 */
+/* 新聞區 */
 .news-panel {
-  flex: 3;
-  padding: 12px;
-  overflow-y: auto;
-}
-
-/* 側欄 */
-.side-panel {
   flex: 1;
-  padding: 12px;
-  border-left: 1px solid #c9c2b2;
-  background: #faf7ef;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 /* 新聞卡 */
 .news-item {
   background: white;
   border-left: 4px solid #1f3b2c;
-  margin-bottom: 10px;
-  padding: 12px;
+  margin-bottom: 12px;
+  padding: 14px;
   border-radius: 8px;
 }
 
 /* 標題 */
 .news-title {
   font-weight: bold;
-  margin-bottom: 6px;
   color: #1f3b2c;
+  margin-bottom: 6px;
 }
 
 /* 內容 */
@@ -66,27 +73,15 @@ html, body {
   font-size: 14px;
   white-space: pre-line;
   color: #333;
+  line-height: 1.5;
 }
 
 /* breaking */
 #breaking {
+  display: none;
   background: #8b1e1e;
   color: white;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   border-radius: 6px;
-  display: none;
-}
-
-/* stats */
-.stats-box {
-  font-size: 13px;
-  margin-bottom: 10px;
-  color: #1f3b2c;
-}
-
-/* market */
-.market-box {
-  font-size: 13px;
-  white-space: pre-line;
 }
