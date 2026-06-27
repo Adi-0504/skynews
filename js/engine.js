@@ -1,6 +1,5 @@
-
 /* =========================
-🌍 世界資料
+🌍 空島世界資料
 ========================= */
 
 const cities = ["莫雷","比亞","卡諾","索維","雷瓦","奧恩","拉維爾","希諾","維卡","多恩","米蘭","克羅","塔維","諾亞","薩恩","布拉","維諾","哈爾","奧瑞","利亞","格恩","索拉","米卡","杜恩","洛維"];
@@ -12,9 +11,19 @@ const world = {
   months: ["綠芽月","細雨月","花落月","熙陽月","綠葉月","秋楓月","豐饒月","星空月","寒霜月","冰雪月"]
 };
 
-const memory = {
+/* =========================
+🧠 世界記憶（v6核心）
+========================= */
+
+const state = {
   day: 1,
-  reports: {} // 👈 改：存歷史
+  lastEvent: null,
+  trend: {
+    logistics: 0,
+    economy: 0,
+    population: 0,
+    info: 0
+  }
 };
 
 /* =========================
@@ -30,188 +39,159 @@ const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
 function getTime(day){
   const monthIndex = Math.floor((day-1)/35);
   const date = ((day-1)%35)+1;
-
   const year = world.year + Math.floor(monthIndex/10);
   const month = world.months[monthIndex % 10];
-
   return `浮空曆${year}年・${month}・第${date}日`;
 }
 
 /* =========================
-事件生成（40個，不再爆炸）
+主事件（有延續）
 ========================= */
 
-function makeEvents(){
-  const pool = ["market","logistics","population","incident","rumor","weather"];
+function generateMainEvent(){
 
-  const locations = [...cities, ...villages];
+  const all = [...cities, ...villages];
 
-  return Array.from({length:40}).map(()=>({
-    place: r(locations),
-    type: r(pool)
-  }));
-}
+  // 🔁 70% 延續昨天
+  if(state.lastEvent && Math.random() < 0.7){
+    return {
+      place: state.lastEvent.place,
+      type: state.lastEvent.type,
+      continuation: true
+    };
+  }
 
-/* =========================
-事件分類（關鍵升級）
-========================= */
+  const types = ["物流壓力","市場波動","人口遷移","氣候異常","資訊擴散"];
 
-function classify(events){
-
-  const groups = {
-    market: [],
-    logistics: [],
-    population: [],
-    incident: [],
-    rumor: [],
-    weather: []
+  const event = {
+    place: r(all),
+    type: r(types),
+    continuation: false
   };
 
-  for(const e of events){
-    groups[e.type].push(e);
-  }
-
-  return groups;
+  state.lastEvent = event;
+  return event;
 }
 
 /* =========================
-轉成「故事」不是句子
+影響擴散（自然化）
 ========================= */
 
-function buildStory(type, list){
+function generateImpacts(main){
 
-  const placeCount = {};
+  const all = [...cities, ...villages];
 
-  for(const e of list){
-    placeCount[e.place] = (placeCount[e.place] || 0) + 1;
-  }
+  return all
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 6)
+    .map(p => {
 
-  const topPlaces = Object.entries(placeCount)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,3)
-    .map(x=>x[0]);
+      let effect = "局部變化";
 
-  switch(type){
+      if(main.continuation){
+        effect = "連鎖反應持續擴散";
+      }
 
-    case "market":
-      return `
-今日空島多個地區市場活動同步升溫，其中 ${topPlaces.join("、")} 成為主要交易集中區。
-
-觀測顯示，這些區域的貨物流動明顯加快，尤其是糧食與手工製品需求上升最為明顯。部分攤位出現長時間排隊現象，顯示短期需求正在集中爆發。
-
-專家認為，這種現象通常與跨島補給週期有關，可能代表下一輪物流調整即將開始。
-`;
-
-    case "logistics":
-      return `
-本日空島物流系統出現局部延遲，主要集中於 ${topPlaces.join("、")} 一帶。
-
-空鷹運輸節點回報顯示，部分航線調度時間延長，導致貨物流轉效率下降。雖然整體系統仍維持運作，但部分物資已改道至鄰近城市處理。
-
-若此狀態持續，可能會影響下一階段的市場供應節奏。
-`;
-
-    case "population":
-      return `
-人口流動在 ${topPlaces.join("、")} 出現明顯集中趨勢。
-
-短時間內大量居民向特定區域移動，使得部分市場與補給點承受額外壓力。此類現象通常與交易機會或資源分配變化有關。
-
-目前尚未觀測到擁擠失控，但區域管理已開始進行流量調整。
-`;
-
-    case "weather":
-      return `
-空島氣候系統在 ${topPlaces.join("、")} 出現短期波動。
-
-風流密度與雲層結構變化，使部分空鷹航線需調整飛行高度。雖未造成中斷，但已影響運輸效率。
-
-氣象觀測中心表示，此類變動通常持續時間不長，但仍需持續監控。
-`;
-
-    case "rumor":
-      return `
-資訊流動異常在 ${topPlaces.join("、")} 擴散。
-
-當地居民之間出現大量未經確認的消息交流，主要集中在資源分配與市場變動議題上。雖未造成實質混亂，但已影響部分交易信心。
-
-目前管理單位已開始介入資訊整理。
-`;
-
-    case "incident":
-      return `
-局部區域在 ${topPlaces.join("、")} 出現異常事件紀錄。
-
-監測系統顯示短暫不穩定波動，但未形成跨區連鎖反應。事件細節仍在調查中，目前未影響主要城市運作。
-
-系統評估為低風險等級。
-`;
-
-    default:
-      return `系統出現一般性變化。`;
-  }
+      return { place: p, effect };
+    });
 }
 
 /* =========================
-生成專題
+更新世界趨勢
 ========================= */
 
-function generateReport(day){
+function updateTrend(main){
 
-  const events = makeEvents();
-  const groups = classify(events);
+  switch(main.type){
 
-  const stories = [];
+    case "物流壓力":
+      state.trend.logistics += 1;
+      break;
 
-  for(const key in groups){
-    if(groups[key].length > 0){
-      stories.push(buildStory(key, groups[key]));
-    }
+    case "市場波動":
+      state.trend.economy += 1;
+      break;
+
+    case "人口遷移":
+      state.trend.population += 1;
+      break;
+
+    case "資訊擴散":
+      state.trend.info += 1;
+      break;
+
+    case "氣候異常":
+      state.trend.logistics -= 0.5;
+      break;
   }
-
-  // 只取 3~5篇
-  const finalStories = stories.slice(0,5);
-
-  const title = `
-<div class="headline">
-空島跨區域觀測報導
-</div>
-<p>${getTime(day)}</p>
-`;
-
-  const body = finalStories.map((s,i)=>`
-<div class="article">
-<div class="title">專題 ${i+1}</div>
-<p>${s}</p>
-</div>
-`).join("");
-
-  const footer = `
-<div class="article">
-<div class="title">總體觀測</div>
-<p>
-今日空島整體維持穩定，但局部市場與物流系統出現輕微波動。
-事件未形成連鎖效應，系統仍處於可控範圍。
-</p>
-</div>
-`;
-
-  return title + body + footer;
 }
 
 /* =========================
-render + history
+生成文章（單篇）
+========================= */
+
+function generateArticle(day){
+
+  const main = generateMainEvent();
+  const impacts = generateImpacts(main);
+
+  updateTrend(main);
+
+  const time = getTime(day);
+
+  let text = "";
+
+  /* 標題 */
+  text += `空島跨區域監測報導：`;
+
+  if(main.continuation){
+    text += `昨日事件持續延伸，${main.place}${main.type}進一步加劇\n\n`;
+  } else {
+    text += `${main.place}${main.type}引發局部變動\n\n`;
+  }
+
+  /* 開頭 */
+  text += `在${time}的監測中，空島觀測系統持續追蹤各區域動態變化。`;
+
+  if(main.continuation){
+    text += `昨日於${main.place}出現的現象，在今日已進入擴散階段。\n\n`;
+  } else {
+    text += `${main.place}於今日首次出現明顯異常。\n\n`;
+  }
+
+  /* 主體 */
+  text += `物流與市場系統開始出現不同程度的連動調整，部分航線與補給節點被迫重新分配資源，以維持整體穩定。\n\n`;
+
+  /* 擴散 */
+  text += `影響逐步向外延伸，${impacts[0].place}與${impacts[1].place}出現${impacts[0].effect}現象，而${impacts[2].place}則開始出現初期連動跡象。\n\n`;
+
+  /* 趨勢自然寫入（不是數據） */
+  if(state.trend.logistics > 2){
+    text += `目前物流壓力持續累積，空鷹航線調度頻率明顯增加。\n\n`;
+  }
+
+  if(state.trend.economy > 2){
+    text += `市場交易節奏出現加速現象，部分城市價格波動幅度擴大。\n\n`;
+  }
+
+  /* 收束 */
+  text += `空島整體仍維持穩定結構，但事件呈現出逐步延展的趨勢，後續發展仍需持續觀測。`;
+
+  return text;
+}
+
+/* =========================
+render
 ========================= */
 
 function render(){
 
-  document.getElementById("time").innerText = getTime(memory.day);
+  const content = document.getElementById("content");
+  const time = document.getElementById("time");
 
-  if(!memory.reports[memory.day]){
-    memory.reports[memory.day] = generateReport(memory.day);
-  }
+  time.innerText = getTime(state.day);
 
-  document.getElementById("content").innerHTML = memory.reports[memory.day];
+  content.innerText = generateArticle(state.day);
 }
 
 /* =========================
@@ -220,15 +200,15 @@ init
 
 function init(){
 
-  document.getElementById("prevBtn").addEventListener("click", ()=>{
-    if(memory.day > 1){
-      memory.day--;
+  document.getElementById("prevBtn").addEventListener("click", () => {
+    if(state.day > 1){
+      state.day--;
       render();
     }
   });
 
-  document.getElementById("nextBtn").addEventListener("click", ()=>{
-    memory.day++;
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    state.day++;
     render();
   });
 
