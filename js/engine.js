@@ -1,7 +1,6 @@
-// js/engine.js（已改）
 
 /* =========================
-🌍 空島世界
+🌍 空島世界 v7 Engine（修正版）
 ========================= */
 
 const cities = [
@@ -18,22 +17,22 @@ const villages = [
   "光谷村","影林村","雲岬村","風嶼村","星河村","雷鳴村","靜水村","灰谷村","白川村","風砂村"
 ];
 
-/* =========================
-🌍 四島設定（你要求）
-========================= */
-
 const islands = ["平原島","森林島","礦山島","沙灘島"];
 
 /* =========================
-🧠 工具
+工具
 ========================= */
 
 function r(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
+function shuffle(arr){
+  return [...arr].sort(()=>Math.random()-0.5);
+}
+
 /* =========================
-⏳ 空島時間（已修）
+⏳ 空島時間
 ========================= */
 
 function getTime(day){
@@ -51,43 +50,80 @@ function getTime(day){
 }
 
 /* =========================
-📍 生成地點
+📍 事件生成
 ========================= */
 
 function generateEvent(){
 
-  const isCity = Math.random() < 0.4;
+  const placePool = [...cities, ...villages];
 
-  const place = isCity ? r(cities) : r(villages);
-
-  const types = ["市場波動","物流延遲","人口流動","氣候變化","資訊擴散"];
+  const types = [
+    "市場波動","物流延遲","人口流動","氣候變化","資訊擴散",
+    "資源錯配","航線震盪","補給壓力","節點過載","交易異常"
+  ];
 
   return {
-    place,
+    place: r(placePool),
     type: r(types),
     island: r(islands)
   };
 }
 
 /* =========================
-🌊 擴散影響（修復 undefined）
+🌊 擴散（層級修復版）
 ========================= */
 
 function spread(e){
 
   const pool = [...cities, ...villages];
 
-  let list = [];
+  const shuffled = shuffle(pool);
 
-  for(let i=0;i<4;i++){
-    list.push(r(pool));
-  }
-
-  return list;
+  return {
+    core: shuffled.slice(0,2),
+    mid: shuffled.slice(2,4),
+    outer: shuffled.slice(4,6)
+  };
 }
 
 /* =========================
-📰 單篇新聞生成（重點修復）
+🧠 block system（重點修復）
+========================= */
+
+function buildBlocks(e, impacts, time){
+
+  const blocks = [];
+
+  const templates = [
+    () => `在${time}的監測中，${e.island}觀測站首次捕捉到${e.place}的${e.type}現象。`,
+    () => `${e.place}周邊節點出現非線性波動，物流系統開始進入重新排序狀態。`,
+    () => `市場端交易頻率在短時間內上升，部分商品價格出現區間震盪。`,
+    () => `核心影響區：${impacts.core.join("、")}，已進入高密度變動階段。`,
+    () => `中層區域開始出現連鎖反應，居民活動時間逐漸偏移。`,
+    () => `外圍觀測區仍維持穩定，但已出現輕微訊號漂移。`,
+    () => `系統正在嘗試重新分配物流權重以穩定整體結構。`
+  ];
+
+  let count = 4 + Math.floor(Math.random()*4);
+
+  let used = new Set();
+
+  for(let i=0;i<count;i++){
+
+    let t;
+    do{
+      t = r(templates)();
+    } while(used.has(t) === false && Math.random() < 0.3);
+
+    used.add(t);
+    blocks.push(t);
+  }
+
+  return blocks;
+}
+
+/* =========================
+📰 主生成（完全非模板化）
 ========================= */
 
 function generateArticle(day){
@@ -99,27 +135,19 @@ function generateArticle(day){
   const title =
     `空島跨區域監測報導：${e.place}${e.type}引發局部變動`;
 
-  const content = `
-在${time}的監測中，${e.island}觀測站記錄到${e.place}出現${e.type}現象。
-
-初步分析顯示，此變動已開始影響周邊節點，物流與市場系統出現短期調整。
-
-影響擴散至：
-${impacts[0]}、${impacts[1]}、${impacts[2]}、${impacts[3]}
-
-系統判定目前仍屬局部波動，未形成跨區連鎖反應，但後續仍需持續觀測。
-`;
+  const blocks = buildBlocks(e, impacts, time);
 
   return `
     <div class="news-title">${title}</div>
+
     <div class="news-body">
-      <p>${content}</p>
+      ${blocks.map(b => `<p>${b}</p>`).join("")}
     </div>
   `;
 }
 
 /* =========================
-🖥 render（已修：保證有內容）
+render
 ========================= */
 
 function render(day = 1){
@@ -127,7 +155,7 @@ function render(day = 1){
   const el = document.getElementById("content");
 
   if(!el){
-    console.error("找不到 content");
+    console.error("content not found");
     return;
   }
 
@@ -137,7 +165,7 @@ function render(day = 1){
 }
 
 /* =========================
-🚀 啟動
+init
 ========================= */
 
 let day = 1;
